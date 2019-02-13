@@ -1,0 +1,9 @@
+<workunit>
+    
+    <invokers>
+         <invoker type="loader" index="100" action="init"/>
+    </invokers>
+    
+    <code class="system.controller.SuspendTimerController"/>
+    
+</workunit>

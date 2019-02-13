@@ -1,0 +1,40 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="loader" caption="Change Pwd" index="-800" action="init"/> 
+    </invokers>
+    
+    <code>
+    <![CDATA[
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.util.*;
+                
+        public class ChangeLoginPwdController
+        {            
+            @Script("User")
+            def user;
+            
+            String newpwd;
+            String confirmpwd;
+            
+            public def init() 
+            {
+                def changePwd = user.authOptions?.remove("CHANGE_PWD_ON_LOGIN");
+                if (changePwd == true) return "default";
+
+                return "_close";
+            }    
+
+            public def changePwd() 
+            {
+                user.changePwd( null, newpwd, confirmpwd );
+                return "_close";
+            }            
+        }
+        ]]>
+    </code>
+    <pages>
+        <page template="system.user.ui.ChangePwdOnLoginPage" />
+    </pages>
+</workunit>

@@ -1,0 +1,7 @@
+"(add|edit|remove)InputParams"[mode=='read'] {
+    enabled: false;
+}
+
+"(add|edit|remove)InputParams"[mode!='read'] {
+    enabled: true;
+}

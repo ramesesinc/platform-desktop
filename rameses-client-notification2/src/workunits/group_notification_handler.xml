@@ -1,0 +1,7 @@
+<workunit>
+    <invokers>
+        <invoker type="notification:handler" action="init" target="process" permission="system"/> 
+    </invokers>
+    
+    <code class="com.rameses.client.notification.models.GroupNotificationHandlerModel"/>
+</workunit>

@@ -1,0 +1,75 @@
+<workunit>
+    
+    <invokers>
+        <invoker folderid="/menu/system" action="init" caption="Module Manager" index="2" target="popup"/>
+
+        <invoker type="quick_launcher" code="modmgr" action="init" caption="Module Manager" 
+                 desc="Module Manager" target="popup"/>
+    </invokers>
+    
+    <code>
+<![CDATA[
+    
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.common.*;
+
+public class ModuleManagerController
+{
+    def moduleMgr;
+    
+    void init() { 
+        moduleMgr = new system.module.ModuleManager();
+    } 
+
+    def selectedItem;
+    def listHandler = [
+        fetchList: {o-> 
+            return moduleMgr.modules; 
+        }
+    ] as BasicListModel  
+
+    def getHtml() {
+        def domain = selectedItem?.conf.domain;
+        def category = selectedItem?.category;
+        def desc = selectedItem?.conf.desc;
+        if ( desc==null ) desc = selectedItem.desc; 
+        
+        def data = [:]; 
+        if ( selectedItem?.conf ) { 
+            data.putAll( selectedItem.conf ); 
+            data.remove('name'); 
+            data.remove('domain'); 
+            data.remove('category'); 
+            data.remove('desc');  
+        } 
+        
+        def buffer = new StringBuilder();
+        data.each{ k,v-> 
+            buffer.append("<b>"+ k +":</b> &nbsp;&nbsp;"+ v +"<br/>");  
+        } 
+        
+        return """ 
+            <html>
+            <body>
+                <b>Version :</b> &nbsp;&nbsp; ${selectedItem.version} <br/> 
+                <b>Domain  :</b> &nbsp;&nbsp; ${domain? domain: '- None -'} <br/> 
+                <b>Category:</b> &nbsp;&nbsp; ${category? category: '- None -'} <br/>                 
+                <br/><br/>
+                <b>Description</b><br/> 
+                ${desc? desc: '- None -'} 
+                <br/><br/>
+                ${buffer}  
+            </body> 
+            </html> 
+        """; 
+    } 
+} 
+]]>
+    </code>
+    
+    <pages>
+        <page template="system.module.MainPage" />
+    </pages>
+</workunit>

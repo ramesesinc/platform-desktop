@@ -1,0 +1,14 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="loader" caption="Registration" index="-5000" action="check"/>
+    </invokers>
+    
+    <code class="system.registration.RegistrationController"/>
+    
+    <pages>
+        <page template="system.registration.ui.RegistrationInitPage"/>
+        <page template="system.registration.ui.NewTerminalRegistrationPage" name="new"/>
+    </pages>
+    
+</workunit>

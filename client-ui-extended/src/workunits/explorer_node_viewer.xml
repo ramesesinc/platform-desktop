@@ -1,0 +1,56 @@
+<workunit>
+    <invokers>
+        <invoker type="explorer-default-viewer"/> 
+    </invokers>
+    
+    <pages>
+        <page template="com.rameses.osiris2.themes.ListPage"/>
+        <page name="queryform" template="com.rameses.osiris2.themes.DefaultQueryFormPanel"/>
+    </pages>    
+    
+    <code>
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;   
+    
+    class ExplorerDefaultViewer extends ListController implements ExplorerNodeViewer {
+    
+        private Node node;
+        
+        public void setNode(Node node) { this.node = node; }
+        
+        public void updateView() {}
+        
+        public String getTitle() { return node?.caption; } 
+        
+        public String getServiceName() { return null; } 
+        public int getRows() { return 20; } 
+        
+        public Opener getQueryForm() { return null; } 
+        
+        public List getColumnList() {
+            return [
+                [name:'caption', caption:'Name']
+            ];
+        } 
+    
+        public List fetchList(Map params) {
+            if (node == null) return null;
+            
+            if (!node.hasItems()) node.reloadItems(); 
+            
+            return node.getItems();
+        } 
+        
+        public Object open() {
+            def selNode = selectedEntity;
+            if (selNode instanceof Node) selNode.open();
+            
+            return null; 
+        } 
+        
+        public List getFormActions() { return null; } 
+    } 
+    </code>
+</workunit>

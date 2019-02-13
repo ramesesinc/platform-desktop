@@ -1,0 +1,112 @@
+<workunit>
+    <invokers>
+        <invoker type="toolbar" icon="images/toolbars/barcode_global.png" caption="" 
+            action="init" target="window" permission="system" windowmode="glasspane" 
+            tooltip="Barcode Search" index="-17"/> 
+            
+        <invoker type="barcode" icon="images/toolbars/barcode.png" caption="Barcode" 
+            action="init" target="window" permission="system" windowmode="glasspane"/>
+    </invokers>
+    
+    <code>
+    <![CDATA[    
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.common.*;
+        import com.rameses.util.*;
+        
+        class BarcodeSearchController 
+        { 
+            @Binding
+            def binding;
+            
+            @FormTitle
+            def formTitle = "Barcode Search"; 
+        
+            def prefix;
+            def handler;
+            String barcode;
+            
+            void init() { 
+                barcode = null; 
+            }
+            
+            def search() { 
+                if (barcode == null || barcode.length() == 0) return null; 
+                
+                if (!barcode.matches('[0-9a-zA-Z]{5,5}.[0-9a-zA-Z:_\\-]{1,}')) {
+                    MsgBox.alert("Invalid format. Please verify."); 
+                    return;
+                } 
+                
+                def prefixid = barcode.substring(0,5); 
+                def barcodeid = barcode.substring(6);
+                if (prefix != null) {
+                    if (prefix != prefixid) 
+                        throw new Exception('Barcode '+ barcode + ' is not allowed for this transaction'); 
+                    prefixid = prefix; 
+                } 
+                try { 
+                    def opener = null; 
+                    if (handler == null) { 
+                        def list = InvokerUtil.lookupOpeners('global:barcode:'+ prefixid, [barcodeid: barcodeid]); 
+                        boolean test = false;
+                        for(o in list) {
+                            def pt = o.properties.pattern;
+                            def expr = o.properties.expr;
+                            test = false;
+                            if( pt ) {
+                                test = barcodeid.matches(pt);
+                            }
+                            else if( expr ) { 
+                                test = ExpressionResolver.getInstance().evalBoolean( expr, [barcodeid:barcodeid] );
+                            }
+                            else {
+                                test = true;
+                            }
+                            if(test) {
+                                opener = o;
+                                break;
+                            }
+                        }
+                        if(!opener) 
+                            throw new Exception('No openers found for  [global:barcode:'+ prefixid +']');
+                    } 
+                    else { 
+                        try { 
+                            if (prefix == null) { 
+                                opener = handler(barcode); 
+                            } else { 
+                                opener = handler(barcodeid); 
+                            } 
+                            
+                            if (opener == null)  
+                                throw new Exception('No available handler found for this particular barcode'); 
+                                
+                        } catch(e) { 
+                            MsgBox.err(e); 
+                            return; 
+                        } 
+                    } 
+                    
+                    opener.properties.closeBehindOnStart = true;
+                    return opener;
+                } catch(e) { 
+                    MsgBox.err(e);
+                    return null; 
+                } 
+            } 
+            
+            def cancel() {
+                return '_close';
+            } 
+        }
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="system.tools.ui.BarcodeSearchPage"/> 
+    </pages>
+    
+</workunit>

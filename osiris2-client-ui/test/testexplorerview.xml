@@ -1,0 +1,19 @@
+<workunit extends="wtemplates/ExplorerViewController.xml">
+    <invokers>
+        <invoker folderid="/menu/transaction" caption="Test Explorer View"/>        
+    </invokers>
+    
+    <code>
+    <![CDATA[ 
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;
+
+    class TestExplorerViewController extends ExplorerViewController
+    { 
+        String serviceName = "ExplorerViewService";
+    }
+    ]]> 
+    </code>
+</workunit>

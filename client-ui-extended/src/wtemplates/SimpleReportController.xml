@@ -1,0 +1,11 @@
+<workunit>
+    <invokers>
+        <invoker type="formActions" action="_close" caption="Close" mnemonic="c"  
+                 immediate="true" icon="images/toolbars/cancel.png" />
+    </invokers>
+
+    <pages>
+        <page name="report" template="com.rameses.osiris2.common.ui.ReportPreviewPage" />
+        <page name="preview" template="com.rameses.osiris2.common.ui.ReportPreviewPage" />
+    </pages>
+</workunit>

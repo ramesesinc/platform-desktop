@@ -1,0 +1,40 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="taskmessage:create" caption="Task Message"/>
+    </invokers>
+    
+    <code>
+    <![CDATA[
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.osiris2.common.*;   
+        
+        public class TaskMessageComponent  {
+        
+            def handler; 
+            def message;
+            def assignees;
+            def task;
+            def assignee;
+            
+            def doOk() {
+                task.message = message;
+                if(assignee) task.assignee = assignee;
+                if (handler) handler(); 
+                return "_close";
+            }
+            
+            def doCancel() {
+                return "_close";
+            }
+        }
+    ]]>
+    </code>
+
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.TaskMessage"/>
+    </pages>
+    
+</workunit>

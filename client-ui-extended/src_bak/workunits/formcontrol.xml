@@ -1,0 +1,54 @@
+<workunit>
+    <invokers>
+        <invoker type="formcontrol:open" caption="Form Control" target="popup"/>
+   </invokers>
+   
+   <code>
+       <![CDATA[
+        import com.rameses.osiris2.common.*;
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.client.reports.*;
+        
+        class FormControl {
+        
+            def saveHandler;
+            def control = [:];
+            
+            def types = ["text","decimal","integer", "combo", "opener","checkbox"];
+            
+            def doOk() {
+                saveHandler(control);
+                return "_close";
+            }
+            
+            def doCancel() {
+                return "_close";
+            }
+            
+            
+            def optionHandlers = [
+                "combo" : new Opener(outcome:"combo"),
+                "opener" : new Opener(outcome:"opener"),
+            ]
+            def getOptionHandler(){
+                return optionHandlers[control.type];
+            }
+            
+            def items = [
+                [objid:'id1',title:'My First'],
+                [objid:'id2',title:'My second'],
+            ]
+            
+            
+        }
+        ]]>
+   </code>
+   <pages>
+       <page template="com.rameses.osiris2.common.ui.FormControlPage" />
+       
+       <page name="combo" template="com.rameses.osiris2.common.ui.FormControlTypeCombo" />
+       <page name="opener" template="com.rameses.osiris2.common.ui.FormControlTypeOpener" />
+   </pages>
+</workunit>

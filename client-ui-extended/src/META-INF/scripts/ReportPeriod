@@ -1,0 +1,194 @@
+import java.util.*;
+import java.text.SimpleDateFormat; 
+
+public class ReportPeriod  
+{
+    public final static FORMATTERS = [:]; 
+
+    def _quarters = [1, 2, 3, 4]; 
+
+    def _types = [
+        [type:'yearly', title:'Yearly'],
+        [type:'quarterly', title:'Quarterly'],
+        [type:'monthly', title:'Monthly'],
+        [type:'daily', title:'Daily'],
+        [type:'range', title:'Range']
+    ];
+
+    def _months = [
+        [index:1, qtr:1, title:'JANUARY'], 
+        [index:2, qtr:1, title:'FEBRUARY'], 
+        [index:3, qtr:1, title:'MARCH'], 
+        [index:4, qtr:2, title:'APRIL'], 
+        [index:5, qtr:2, title:'MAY'], 
+        [index:6, qtr:2, title:'JUNE'], 
+        [index:7, qtr:3, title:'JULY'], 
+        [index:8, qtr:3, title:'AUGUST'], 
+        [index:9, qtr:3, title:'SEPTEMBER'], 
+        [index:10, qtr:4, title:'OCTOBER'], 
+        [index:11, qtr:4, title:'NOVEMBER'], 
+        [index:12, qtr:4, title:'DECEMBER'] 
+    ]; 
+
+    public def getQuarters() { return _quarters; }
+    public def getTypes() { return _types; }
+    public def getMonths() { return _months; }
+
+    public def getFormatter( String pattern ) {
+        def formatter = FORMATTERS.get( pattern ); 
+        if ( formatter == null ) {
+            formatter = new SimpleDateFormat( pattern ); 
+            FORMATTERS.put( pattern, formatter ); 
+        } 
+        return formatter; 
+    }
+
+    public String format( Date value, String pattern ) { 
+        def formatter = getFormatter( pattern ); 
+        return formatter.format( value ); 
+    } 
+
+    public def parse( def value ) { 
+        if ( value instanceof Date ) return value; 
+
+        def formatter = getFormatter( 'yyyy-MM-dd' ); 
+        def date = formatter.parse( value.toString().split(' ')[0] );  
+        return new java.sql.Date( date.getTime() ); 
+    } 
+
+    public def parseDateTime( def value ) {
+        if ( value instanceof java.sql.Timestamp ) return value; 
+
+        def date = null; 
+        if ( value instanceof Date ) {
+            date = value; 
+        } else {
+            def formatter = getFormatter( pattern ); 
+            date = formatter.parse( value );
+        } 
+        return new java.sql.Timestamp( date.getTime() );  
+    } 
+
+    public Date getQtrStartDate( int year, int qtr ) { 
+        int month = 0; 
+        switch ( qtr ) {
+            case 1: month = Calendar.JANUARY; break;
+            case 2: month = Calendar.APRIL; break;
+            case 3: month = Calendar.JULY; break;
+            case 4: month = Calendar.OCTOBER; break;
+            default: throw new Exception('invalid quarter value');
+        }
+        return getMonthStartDate( year, month+1 ); 
+    } 
+
+    public Date getQtrEndDate( int year, int qtr ) { 
+        int month = 0; 
+        switch ( qtr ) {
+            case 1: month = Calendar.MARCH; break;
+            case 2: month = Calendar.JUNE; break;
+            case 3: month = Calendar.SEPTEMBER; break;
+            case 4: month = Calendar.DECEMBER; break;
+            default: throw new Exception('invalid quarter value');
+        }
+        return getMonthEndDate( year, month+1 );  
+    } 
+
+    public Date getYearStartDate( int year ) {
+        return getMonthStartDate( year, 1 ); 
+    }
+
+    public Date getYearEndDate( int year ) { 
+        return getMonthEndDate( year, 12 ); 
+    } 
+
+    public Date getMonthStartDate( int year, int month ) {
+        if ( month >= 1 && month <= 12 ) { 
+            def cal = Calendar.getInstance(); 
+            cal.set( year, month-1, 1,  0, 0, 0 ); 
+            return new java.sql.Timestamp(cal.getTimeInMillis()); 
+        }
+        throw new Exception('invalid month value');
+    }
+
+    public Date getMonthEndDate( int year, int month ) {
+        def date = getMonthStartDate( year, month ); 
+        def cal = Calendar.getInstance();         
+        cal.setTime( date ); 
+
+        int d = cal.getActualMaximum( Calendar.DAY_OF_MONTH );
+        cal.set( Calendar.DAY_OF_MONTH, d ); 
+        cal.set( Calendar.HOUR, 23 ); 
+        cal.set( Calendar.MINUTE, 59 ); 
+        cal.set( Calendar.SECOND, 59 ); 
+        return new java.sql.Timestamp(cal.getTimeInMillis()); 
+    } 
+
+    public String getPeriodTitle( Map params ) { 
+        if ( params.date ) {
+            def date = parse( params.date ); 
+            return format( date, 'MMMMM dd, yyyy' );  
+        } else if ( params.year && params.month ) {
+            def nfo = _months.find{ it.index==params.month }
+            if ( !nfo ) throw new Exception('invalid month value'); 
+
+            return ''+ nfo.title +' '+ params.year; 
+        } else if ( params.year && params.qtr ) {
+            def items = _months.findAll{ it.qtr==params.qtr } 
+            if ( !items ) throw new Exception('invalid quarter value'); 
+
+            def t1 = items.min{ it.index }.title;  
+            def t2 = items.max{ it.index }.title; 
+            if ( t1 == t2 ) {
+                return ''+ t1 +' '+ params.year; 
+            } else {
+                return ''+ t1 +' - '+ t2 +' '+ params.year; 
+            }
+        } else if ( params.startdate && params.enddate ) { 
+            def t1 = params.startdate.toString().split(' ')[0]; 
+            def t2 = params.enddate.toString().split(' ')[0]; 
+            return ''+ t1 +' TO '+ t2; 
+        } else if ( params.year ) { 
+            def t1 = _months.min{ it.index }.title; 
+            def t2 = _months.max{ it.index }.title;  
+            return ''+ t1 +' - '+ t2 +' '+ params.year; 
+        } 
+        return null; 
+    } 
+
+    public def build( String type, def params ) {
+        def m = [:]; 
+        if ( type == 'yearly' ) { 
+            if ( !params.year ) throw new Exception('year parameter is required'); 
+            m.startdate = format( getYearStartDate( params.year ), 'yyyy-MM-dd HH:mm:ss' );
+            m.enddate   = format( getYearEndDate( params.year ), 'yyyy-MM-dd HH:mm:ss' );
+        } else if ( type == 'quarterly' ) {
+            if ( !params.year ) throw new Exception('year parameter is required'); 
+            if ( !params.qtr ) throw new Exception('qtr parameter is required'); 
+            m.startdate = format( getQtrStartDate( params.year, params.qtr ), 'yyyy-MM-dd HH:mm:ss' );
+            m.enddate   = format( getQtrEndDate( params.year, params.qtr ), 'yyyy-MM-dd HH:mm:ss' );
+        } else if ( type == 'monthly' ) { 
+            if ( !params.year ) throw new Exception('year parameter is required'); 
+            if ( !params.month?.index ) throw new Exception('month.index parameter is required'); 
+            m.startdate = format( getMonthStartDate( params.year, params.month.index ), 'yyyy-MM-dd HH:mm:ss' );
+            m.enddate   = format( getMonthEndDate( params.year, params.month.index ), 'yyyy-MM-dd HH:mm:ss' );
+        } else if ( type == 'daily' ) { 
+            if ( !params.date ) throw new Exception('date parameter is required'); 
+            m.startdate = ''+ parse( params.date ) +' 00:00:00'; 
+            m.enddate   = ''+ parse( params.date ) +' 23:59:59'; 
+        } else if ( type == 'range' ) { 
+            if ( !params.startdate ) throw new Exception('startdate parameter is required'); 
+            if ( !params.enddate ) throw new Exception('enddate parameter is required'); 
+
+            m.startdate = parse( params.startdate );
+            m.enddate   = parse( params.enddate );
+            if ( m.startdate.after( m.enddate )) 
+                throw new Exception('Start Date must not be greater than the End Date'); 
+
+            m.startdate = ''+ m.startdate +' 00:00:00'; 
+            m.enddate   = ''+ m.enddate   +' 23:59:59'; 
+        } else {
+            throw new Exception('invalid type '+ type); 
+        } 
+        return m; 
+    } 
+}

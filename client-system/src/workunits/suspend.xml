@@ -1,0 +1,16 @@
+<workunit>
+    <invokers>
+        <invoker id="system:suspend_Suspend" type="system:suspend" action="init" 
+            caption="Suspend" target="popup" windowmode="screenlock"/>
+
+        <invoker id="system:suspend_Suspend" folderid="/menu/system" action="init" caption="Suspend ... " 
+            index="17000" separator="before" target="popup" windowmode="screenlock" 
+            permission="system" icon="images/suspend.png"/> 
+    </invokers>
+    
+    <code class="system.controller.SuspendController"/>
+
+    <pages>
+        <page template="system.user.ui.SuspendPage" />
+    </pages>
+</workunit>

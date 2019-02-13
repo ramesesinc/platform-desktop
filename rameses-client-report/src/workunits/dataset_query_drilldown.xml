@@ -1,0 +1,36 @@
+<workunit>
+    <invokers>
+        <invoker type="dataset-query:drilldown" caption="Info" 
+             index="1" />
+   </invokers>
+   
+   
+   <code>
+       <![CDATA[
+        import com.rameses.osiris2.common.*;
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.client.reports.*;
+        
+        class DatasetQueryDrilldown  {
+            def subset;
+            def subsetcols;
+            
+             def resultModel = [
+                getColumnList: {
+                    return subsetcols;
+                },
+                fetchList: { o->
+                    return subset;
+                }
+            ] as BasicListModel;
+        }
+        ]]>
+   </code>
+   
+   <pages>
+       <page template="com.rameses.client.reports.DatasetQueryDrilldownPage" />
+   </pages>
+   
+</workunit>

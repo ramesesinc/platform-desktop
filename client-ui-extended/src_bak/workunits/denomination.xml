@@ -1,0 +1,68 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="cash:breakdown" action="init"/>
+    </invokers>
+    
+    <code>
+        <![CDATA[
+        
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        
+        public class CashReceiptBreakdownController  {
+        
+            @Binding
+            def binding;
+        
+            def allowEdit = true;
+            
+            def entries;
+            
+            def handler;
+            def selectedItem;
+            def mode;
+            def onupdate;
+            def totalBreakdown = 0;
+
+            //store output in a map.
+            void init() {
+                if(entries.size() == 0 ) {
+                  def m = [ 1000.00, 500.00, 200.00,  100.00, 50.00, 20.00, 10.00, 1.00 ];
+                  m.each {
+                    entries << [ caption: (it > 1.00? it+'' : 'Coins'),  
+                        denomination:it,  qty: 0, amount:0.0 ]
+                  }
+                }    
+            }
+                        
+            def listModel =[
+                isAllowAdd: { return false; },
+                fetchList:{o->
+                    return entries;
+                },
+                onColumnUpdate:{o, colname ->
+                    o.qty = (o.qty == null) ? 0.0 : o.qty;
+                    if( o.denomination > 1.00 ) 
+                        o.qty = (int) o.qty;
+                    
+                    def prevAmt = o.amount;
+                    o.amount = o.denomination * o.qty;
+                    totalBreakdown += ( o.amount - prevAmt );
+                    if(onupdate) onupdate( totalBreakdown );
+                }
+            ] as EditorListModel;
+            
+            
+                                                
+        }
+        
+        ]]>
+    </code>
+
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.CashBreakdownPage"/>
+    </pages>
+    
+</workunit>

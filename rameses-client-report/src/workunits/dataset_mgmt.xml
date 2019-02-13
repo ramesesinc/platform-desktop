@@ -1,0 +1,7 @@
+<workunit extends="wtemplates/ExplorerViewController.xml" 
+    serviceName="DatasetService" context="dataset" defaultFileType="dataset">
+    <invokers>
+        <invoker folderid="/menu/mgmt" caption="Dataset Management" 
+            permission="system" index="1" action="init"/>
+   </invokers>
+</workunit>

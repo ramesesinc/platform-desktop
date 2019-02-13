@@ -1,0 +1,22 @@
+<workunit>
+    <pages>
+        <page template="com.rameses.osiris2.themes.ExplorerViewPage"/>
+    </pages>
+    
+    <code>
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;
+
+    class DefaultExplorerViewController extends ExplorerViewController
+    {
+        boolean isAllowSearch() {
+            def ov = workunitProperties.allowSearch;
+            if (ov == 'false') return false; 
+            else if (ov == 'true') return true;
+            else return super.isAllowSearch(); 
+        } 
+    }  
+    </code>    
+</workunit>

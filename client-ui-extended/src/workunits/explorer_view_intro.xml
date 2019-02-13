@@ -1,0 +1,14 @@
+<workunit>
+    <invokers>
+        <invoker type="explorer-view-intro"/> 
+    </invokers>
+    
+    <pages>
+        <page template="com.rameses.osiris2.themes.ExplorerViewIntroPage"/>
+    </pages> 
+    
+    <code>
+    class ExplorerViewIntroController {    
+    } 
+    </code>
+</workunit>

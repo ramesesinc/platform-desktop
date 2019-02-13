@@ -1,0 +1,12 @@
+<workunit>
+    <invokers>
+        <invoker type="sysreport:edit" action="init" caption="Extract Report" 
+                 domain="DEVELOPER" role="REPORT" target="popup"/>
+    </invokers>
+    
+    <code class="com.rameses.osiris2.models.SysReportEditorModel"/> 
+        
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.SysReportEditPage"/> 
+    </pages>
+</workunit>

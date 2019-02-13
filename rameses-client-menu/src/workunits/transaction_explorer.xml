@@ -1,0 +1,27 @@
+<workunit extends="wtemplates/FolderExplorerView.xml">
+    <invokers>
+        <invoker type="toolbar" icon="images/explorer.png" caption="" tooltip="Main Menu"
+            index="-18" permission="system" action="init" windowmode="explorer" />
+    </invokers>
+    <code>
+        <![CDATA[    
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import system.explorer.*;
+        
+        public class MainMenuView extends AbstractTreeExplorer {
+        
+            @FormTitle
+            def formTitle = "Main Menu"
+        
+            public void init() {
+                rootVisible = false;
+                def root = [id: "/explorer", caption:''];
+                doInit( root );
+            }
+        }
+        ]]>
+    </code>
+    
+</workunit>

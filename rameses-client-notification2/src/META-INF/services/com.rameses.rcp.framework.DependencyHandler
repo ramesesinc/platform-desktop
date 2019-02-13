@@ -1,0 +1,3 @@
+com.rameses.client.notification.NotificationDependencyHandler
+com.rameses.client.notification.NotifierDependencyHandler
+com.rameses.client.notification.NotificationServiceDependencyHandler

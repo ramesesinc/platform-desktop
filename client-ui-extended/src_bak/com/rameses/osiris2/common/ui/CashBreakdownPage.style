@@ -1,0 +1,12 @@
+"listModel:item.*"[ item.qty != 0 ] {
+    background-color: yellow;
+    color: black;
+}   
+
+"selectedItem" [allowEdit == true]{
+    readonly:false;
+}
+
+"selectedItem" [allowEdit == false]{
+    readonly:true;
+}

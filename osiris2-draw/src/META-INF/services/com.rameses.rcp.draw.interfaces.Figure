@@ -1,0 +1,15 @@
+com.rameses.rcp.draw.figures.LineFigure
+com.rameses.rcp.draw.figures.PolyLineFigure
+com.rameses.rcp.draw.figures.LineConnector
+com.rameses.rcp.draw.figures.RectangleFigure
+com.rameses.rcp.draw.figures.EllipseFigure
+com.rameses.rcp.draw.figures.PolygonFigure
+com.rameses.rcp.draw.figures.TextFigure
+com.rameses.rcp.draw.figures.ImageFigure
+com.rameses.rcp.draw.figures.WorkflowConnector
+com.rameses.rcp.draw.figures.WorkflowStartNode
+com.rameses.rcp.draw.figures.WorkflowNode
+com.rameses.rcp.draw.figures.WorkflowDecision
+com.rameses.rcp.draw.figures.WorkflowState
+com.rameses.rcp.draw.figures.WorkflowSender
+com.rameses.rcp.draw.figures.WorkflowEndNode

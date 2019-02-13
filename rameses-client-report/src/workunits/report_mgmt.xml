@@ -1,0 +1,7 @@
+<workunit extends="wtemplates/ExplorerViewController.xml" 
+    serviceName="ReportMgmtService" context="report" defaultFileType="report">
+    <invokers>
+        <invoker folderid="/menu/mgmt" caption="Report Management" 
+            permission="system" index="1" action="init"/>
+   </invokers>
+</workunit>

@@ -1,0 +1,7 @@
+<folders>
+    <folder id="explorer">
+        <folder id="txn" caption="Transactions">
+            <folder id="notification" caption="Notification" index="-1"/>
+        </folder>
+    </folder>
+</folders>

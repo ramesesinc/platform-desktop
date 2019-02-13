@@ -1,0 +1,6 @@
+<workunit>
+    <pages>
+        <page template="com.rameses.osiris2.themes.LookupPage"/>
+        <page name="queryform" template="com.rameses.osiris2.themes.DefaultQueryFormPanel"/>
+    </pages>
+</workunit>

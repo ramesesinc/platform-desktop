@@ -1,0 +1,5 @@
+<workunit>
+    <pages>
+        <page name="default" template="com.rameses.osiris2.common.ui.OptionFormPage"/>
+    </pages>
+</workunit>

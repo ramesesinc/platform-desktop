@@ -1,0 +1,6 @@
+<workunit>
+    <code class="system.explorer.FolderExplorerView"/>
+    <pages>
+        <page template="system.explorer.ui.TreeExplorerPage"/>
+    </pages>
+</workunit>

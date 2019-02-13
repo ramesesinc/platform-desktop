@@ -1,0 +1,10 @@
+
+
+
+@ProxyMethod
+public def getNodeList(params) {
+    def parentid = params.id;
+    return [
+        [caption:'Caption', anyitem:'', id:'111', leaf:true, opener:'']
+    ]
+}

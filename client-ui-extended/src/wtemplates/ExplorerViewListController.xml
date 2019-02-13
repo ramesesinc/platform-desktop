@@ -1,0 +1,16 @@
+<workunit>
+    <pages>
+        <page template="com.rameses.osiris2.themes.ExplorerViewListPage"/>
+        <page name="queryform" template="com.rameses.osiris2.themes.DefaultQueryFormPanel"/>
+    </pages>
+    
+    <code>
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;
+
+    class DefaultExplorerViewListController extends ExplorerViewListController {     
+    }   
+    </code>    
+</workunit>

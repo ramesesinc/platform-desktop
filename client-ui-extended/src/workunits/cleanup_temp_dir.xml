@@ -1,0 +1,24 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="loader" action="init" target="process" index="100"/>
+    </invokers>
+    
+    <code>
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;
+        
+    class CleanTempDirController 
+    {   
+        void init() {
+            if ( OsirisContext.env.USERID ) { 
+                println 'run-task: cleanup temp directory...';
+                new FileService().runCleanupTask(); 
+            } 
+        } 
+    } 
+    </code>
+    
+</workunit>

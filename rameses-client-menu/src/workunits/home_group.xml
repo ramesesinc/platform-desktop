@@ -1,0 +1,9 @@
+<workunit> 
+    <invokers>
+        <invoker type="home_group_action" action="init" target="window"/>
+    </invokers>    
+    <code class="system.home.HomeGroupController"/>    
+    <pages>
+        <page template="system.home.HomeGroupPage"/>
+    </pages>
+</workunit>

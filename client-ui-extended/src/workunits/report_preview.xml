@@ -1,0 +1,33 @@
+<workunit>
+    <invokers>
+        <invoker type="report:preview" /> 
+        
+        <invoker type="formActions" caption="Close" action="doClose"/> 
+    </invokers>
+    
+    <code>
+    <![CDATA[
+import com.rameses.rcp.annotations.*;
+import com.rameses.rcp.common.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+public class ReportPreviewModel {
+
+    @Binding
+    def binding;
+
+    def report;
+    def title; 
+    
+    def doClose() { 
+        return '_close'; 
+    } 
+}
+    ]]>
+    </code>
+
+    <pages>
+       <page template="com.rameses.osiris2.common.ui.ReportPreviewPage" />
+    </pages>    
+</workunit>

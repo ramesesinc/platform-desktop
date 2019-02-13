@@ -1,0 +1,10 @@
+import com.rameses.rcp.annotations.*;
+
+public class FileUploader {
+
+    @Service('FileUploadService')
+    def uploadSvc;
+
+    
+
+}

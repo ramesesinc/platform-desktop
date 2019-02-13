@@ -1,0 +1,16 @@
+<workunit>
+    <pages>
+        <page template="com.rameses.osiris2.themes.InboxPage"/>
+        <page template="com.rameses.osiris2.themes.InboxSearchPage" name="queryform"/>
+    </pages>
+    
+    <code>
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;
+
+    class DefaultInboxController extends InboxController {
+    } 
+    </code>    
+</workunit>

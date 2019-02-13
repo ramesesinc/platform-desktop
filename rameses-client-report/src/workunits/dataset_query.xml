@@ -1,0 +1,64 @@
+<workunit>
+    <invokers>
+        <invoker type="dataset:query"/>
+        <invoker type="formActions" caption="Back" action="_close"/>
+   </invokers>
+   
+   
+   <code>
+       <![CDATA[
+        import com.rameses.osiris2.common.*;
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.client.reports.*;        
+        
+        class DatasetQuery {
+            @Service('DatasetService') 
+            def svc;
+        
+            def entity;
+            String title = "Dataset SQL Query";
+            
+            def columns = [];
+            def resultList = [];
+            
+            def resultModel = [
+                getColumnList: {
+                    return columns;
+                },
+                fetchList: { o->
+                    return resultList;
+                },
+                onOpenItem: {item, colName-> 
+                    MsgBox.alert(  );
+                    def m = [:]
+                    m.subset = item[colName];
+                    m.subsetcols = [ [name:'phone', caption:'Phone'] ];
+                    return InvokerUtil.lookupOpener( "dataset-query:drilldown",m );
+                }
+            ] as BasicListModel;
+            
+            def datasources = ["main"]
+            
+            void execute() {              
+                resultList = svc.execQuery(entity.statement, [:]); 
+                columns.clear(); 
+                resultList.columns.each {
+                    if( it.columnLabel.indexOf("_") > 0) {
+                        def name = it.columnLabel.split('_')[0];
+                       columns << [name:name, caption:name]; 
+                    } else { 
+                        columns << [name:it.columnLabel, caption:it.columnLabel];
+                    }                     
+                } 
+                columns.unique();
+                resultModel.reloadAll();
+            }
+        }
+        ]]>
+   </code>
+   <pages>
+       <page template="com.rameses.client.reports.DatasetQueryPage" />
+   </pages>
+</workunit>

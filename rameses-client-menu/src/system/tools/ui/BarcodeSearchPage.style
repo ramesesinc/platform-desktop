@@ -1,0 +1,8 @@
+"icon"[iconVisible == true] {
+    visible: true; 
+    repaint: true;
+} 
+"icon"[iconVisible != true] {
+    visible: false; 
+    repaint: true;
+} 

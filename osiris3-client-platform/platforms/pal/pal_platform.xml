@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>C:\RAMESES\incubation\osiris3-client-platform\dist\osiris3-client-platform.jar</jar>
+  <outfile>C:\RAMESES\incubation\osiris3-client-platform\platforms\pal\pal_platform.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>C:\RAMESES\incubation\osiris3-client-platform\platforms\pal\shortcut.ico</icon>
+  <singleInstance>
+    <mutexName>rameses-rcp-pal-platform</mutexName>
+    <windowTitle></windowTitle>
+  </singleInstance>
+  <classPath>
+    <mainClass>com.rameses.osiris3.platform.OSBootStrap</mainClass>
+    <cp>lib/*</cp>
+    <cp>.</cp>
+  </classPath>
+  <jre>
+    <path>C:\RAMESES\testers\osiris3-queue-platform\released\jre</path>
+    <bundledJre64Bit>false</bundledJre64Bit>
+    <bundledJreAsFallback>false</bundledJreAsFallback>
+    <minVersion>1.6.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
+    <opt>-Xmx1024m -Duser.timezone=Asia/Manila -Djava.library.path=lib/ext/x86</opt>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>.</txtFileVersion>
+    <fileDescription>Philippine Airlines RCP Platform</fileDescription>
+    <copyright>2017</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>.</txtProductVersion>
+    <productName>Philippine Airlines RCP Platform</productName>
+    <companyName>Rameses Systems Inc.</companyName>
+    <internalName>Philippine Airlines RCP Platform</internalName>
+    <originalFilename>pal_platform.exe</originalFilename>
+    <trademarks></trademarks>
+    <language>ENGLISH_US</language>
+  </versionInfo>
+</launch4jConfig>

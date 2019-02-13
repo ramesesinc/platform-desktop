@@ -1,0 +1,105 @@
+<workunit>
+    <invokers>
+        <invoker type="expression:editor" caption="Expression Editor" target="popup" action="init"/>
+    </invokers>
+    <code>
+        <![CDATA[    
+
+        import com.rameses.rcp.annotations.*
+        import com.rameses.rcp.common.*
+        import com.rameses.osiris2.client.*
+        import com.rameses.osiris2.common.*
+        import com.rameses.common.*;
+        
+        class ExpressionEditorController {        
+                
+        
+            ExpressionModel model;    
+        
+            def selectedNode;
+            def updateHandler;
+            def selectedItem;
+            def textHandler = new TextDocumentModel();
+            def value;
+            
+            void init() {
+                value = model.getValue();
+            }
+            
+            def doCancel() {
+                return "_close";
+            }
+            
+            def tree = [
+                getRootNode : { 
+                    return null;
+                },
+                fetchNodes : { o->
+                    if(!o.item) {
+                        return [
+                            [caption:'Variables', group:'var'],
+                            [caption:'Functions', group:'func'],
+                        ];
+                    }
+                    else if(o.item.group == "func") {
+                        return [
+                            [caption:'Logical', leaf:true, group:'func', type:'logical'],
+                            [caption:'String', leaf:true, group:'func', type:'string'],
+                            [caption:'Number', leaf:true, group:'func', type:'number'],
+                            [caption:'Date', leaf:true, group:'func', type:'date'],
+                        ];
+                    }
+                    else if(o.item.group == "var") {
+                        return [
+                            [caption:'Decimal', leaf:true, group:'var', type:'decimal'],
+                            [caption:'Integer', leaf:true, group:'var', type:'integer'],
+                            [caption:'Boolean', leaf:true, group:'var', type:'boolean'],
+                            [caption:'String', leaf:true, group:'var', type:'string'],
+                            [caption:'Date', leaf:true, group:'var', type:'date'],
+                            [caption:'Other', leaf:true, group:'var', type:'object'],
+                        ];
+                    }
+                },
+            ] as TreeNodeModel;   
+            
+            def getListItems() {
+                if(! selectedNode.item ) {
+                    return [];
+                }
+                else if( selectedNode.item.group == "var" ) {
+                    def type = selectedNode.item.type;
+                    return model.getVariables(type);
+                }
+                else if( selectedNode.item.group == "func" ) {
+                    def type = selectedNode.item.type;
+                    return FunctionResolver.instance.getFunctionsByGroup(type);
+                }
+            }
+            
+            
+            void addText() {
+                textHandler.insertText( selectedItem.signature );
+                textHandler.requestFocus();
+            }
+            
+            def doOk() {
+                model.setValue(value);
+                if(updateHandler) updateHandler(value);
+                return '_close';
+            }   
+            
+            def test() {
+                throw new Exception("This function is not yet supported"); 
+            }
+            
+        }
+        
+        ]]>
+        
+    </code>
+    
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.ExpressionEditor"/>
+    </pages>
+    
+</workunit>

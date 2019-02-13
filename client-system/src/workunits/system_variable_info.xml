@@ -1,0 +1,33 @@
+<workunit>
+    <invokers>        
+        <invoker type="var:create" caption="System Variable" 
+            domain="ADMIN" role="SYSADMIN" permission="system" 
+            target="popup" action="create" resizable="false"/> 
+            
+        <invoker type="var:open" caption="System Variable" 
+            domain="ADMIN" role="SYSADMIN" permission="system" 
+            target="popup" action="open" resizable="false"/> 
+    </invokers>
+        
+    <code>
+    <![CDATA[ 
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.common.*;
+
+    class SystemVariableController extends CRUDController 
+    {
+       String serviceName = 'VarService';
+       String createFocusComponent = 'entity.name';
+       String editFocusComponent = 'entity.value';
+       boolean showConfirmOnSave = false; 
+       boolean allowApprove = false;        
+    }
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="system.tools.ui.SystemVariablePage"/> 
+    </pages>    
+</workunit>

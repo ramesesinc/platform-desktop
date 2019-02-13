@@ -1,0 +1,12 @@
+import com.rameses.util.*;
+
+public class Template {
+    
+    String rootPath = "templates";
+
+    public def render(def path, def obj) {
+        if(!path.startsWith("/")) path = "/"+path;
+        if(!path.endsWith(".gtpl")) path = path + ".gtpl";
+        return TemplateProvider.instance.getResult(rootPath + path, obj );
+    }
+}

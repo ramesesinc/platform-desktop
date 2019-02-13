@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker type="drawtool:attribute" action="init" caption="Attributes" target="popupmenu"/>
+    </invokers>
+    <code class="com.rameses.rcp.draw.models.AttributePickerModel">
+    </code>
+    <pages>
+        <page template="com.rameses.rcp.draw.views.AttributePicker"/>
+    </pages>
+</workunit>

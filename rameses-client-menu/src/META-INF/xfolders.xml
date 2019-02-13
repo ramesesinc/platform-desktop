@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<folders>
+    <folder id="menu">
+        <folder id="system" caption="System" index="-9999" mnemonic="S"/>
+        <folder id="txn" caption="Transactions" mnemonic="T"/>
+        <folder id="report" caption="Reports" mnemonic="R"/>
+        <folder id="help" caption="Help" index="999999" mnemonic="H"/>
+    </folder>
+    
+    <folder id="explorer" caption="Explorer">
+        <folder id="txn" caption="Transactions" index="-99"/>
+        <folder id="master" caption="Master" index="-98"/>
+        <folder id="report" caption="Reports" index="-97"/>
+        <folder id="setting" caption="Settings" index="999999"/>
+    </folder>    
+    
+</folders>

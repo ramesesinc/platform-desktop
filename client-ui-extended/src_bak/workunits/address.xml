@@ -1,0 +1,53 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="address:editor" action="init" target="popup"/>
+    </invokers>
+    
+    <code>
+        <![CDATA[
+        
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        
+        public class AddressController  {
+        
+            @Binding
+            def binding;
+        
+            def entity;
+            def addressOpener;
+            def addressOpeners;
+            def handler;
+            
+            void init() {
+                try {
+                    addressOpeners = Inv.lookupOpeners( "addresseditor:type", [:] );
+                    if( addressOpeners ) addressOpener = addressOpeners[0];
+                }
+                catch(e) {
+                    throw new Exception("No addresseditor:types defined");
+                }
+            }
+                 
+            def doOk() {
+                def info = addressOpener.handle.getInfo();
+                handler(info);
+                return "_close";
+            }
+            
+            def doCancel() {
+                return "_close";
+            }
+            
+        }
+        
+        ]]>
+    </code>
+
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.AddressEditor"/>
+    </pages>
+    
+</workunit>

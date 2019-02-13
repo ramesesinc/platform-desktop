@@ -1,0 +1,8 @@
+<workunit>
+    <pages>
+        <page template="com.rameses.osiris2.themes.ListPage"/>
+        <page name="queryform" template="com.rameses.osiris2.themes.DefaultQueryFormPanel"/>
+    </pages>
+    
+    <code class="com.rameses.osiris2.common.DefaultListController"/>
+</workunit>

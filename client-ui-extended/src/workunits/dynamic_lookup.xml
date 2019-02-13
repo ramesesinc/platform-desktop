@@ -1,0 +1,70 @@
+<workunit>
+    <invokers>
+        <invoker type="dynamic:lookup" target="popup"/>
+    </invokers>
+    <code>
+    <![CDATA[    
+        import com.rameses.rcp.annotations.*
+        import com.rameses.rcp.common.*
+        import com.rameses.osiris2.common.*
+        
+        class DynamicLookupControllerImpl extends DynamicLookupModel 
+        { 
+            @Binding
+            def binding;
+            
+            def selectedEntity;
+            def listModel;
+            
+            void setListModel( lm ) {
+                this.listModel = lm;
+                
+                def onselectCallback = null;
+                def onemptyCallback = null;
+                if (lm instanceof Map) {
+                    onselectCallback = lm.onselect;
+                    onemptyCallback = lm.onempty;
+                    
+                } else if (lm != null) { 
+                    if (hasMethod(lm, 'onselect')) { 
+                        onselectCallback = {o-> listModel.onselect(o); } 
+                    }
+                    if (hasMethod(lm, 'onempty')) { 
+                        onemptyCallback = {o-> listModel.onempty(); } 
+                    }
+                } 
+                
+                setOnselect(onselectCallback); 
+                setOnempty(onemptyCallback); 
+            } 
+            
+            public Column[] getColumns() {
+                return listModel.getColumns();
+            }
+            
+            public List fetchList(Map map ) {
+                return listModel.fetchList(map);
+            }
+
+            def doSelect() {
+                def callback = getOnselect(); 
+                if (callback) {
+                    callback(selectedValue);
+                    return '_close';
+                } else {
+                    return super.select(); 
+                } 
+            }
+            
+            def doCancel() { 
+                return super.cancel(); 
+            } 
+        }
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="com.rameses.osiris2.themes.LookupPage"/>
+    </pages>
+    
+</workunit>

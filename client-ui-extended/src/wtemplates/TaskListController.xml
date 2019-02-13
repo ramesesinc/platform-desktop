@@ -1,0 +1,92 @@
+<workunit>
+    
+    <code>
+    <![CDATA[
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.osiris2.common.*;
+        
+        public class TaskListController  {
+            
+            @Service("WorkflowTaskListService2")
+            def service;
+            
+            @Service('DateService')
+            def dtSvc;
+        
+            def entity;
+            def selectedItem;     
+        
+            @Controller
+            def controller;
+            
+            String title = "Task History";
+            
+            def tasks;
+            def duration;
+            
+            def listModel = [
+                fetchList: {
+                    String processname = (String) controller.workunit.workunit.properties.processname;
+                    tasks = service.getList( [processname:processname, refid: entity.objid] );
+                    computeDurations();
+                    return tasks;
+                }
+            ] as BasicListModel;
+            
+            
+            void computeDurations(){
+                def currdate = dtSvc.getServerDate();
+                tasks.each{
+                    it.mins = timeDiffInMinutes( it.enddate, it.startdate, currdate)
+                    it.duration = durationToStr(it.mins)
+                }
+                duration = '';
+                if (tasks)
+                    duration = durationToStr( tasks.mins.sum());
+            }
+            
+           def durationToStr(totalduration){
+                def hours = (int) (totalduration / 60);
+                def mins = totalduration - (hours * 60);
+
+                def days = 0;
+                if (hours >= 24 ){
+                    days = (int) (hours / 24)
+                    hours = hours - (days * 24)
+                }
+
+                def s = '';
+
+                if (days > 0)
+                    s += (days + ' day' + (days <= 1 ? '' : 's'));
+
+                if (hours > 0){
+                    if ( s.length() > 0 )
+                        s += ' ';
+                    s += (hours + ' hr' + (hours <= 1 ? '' : 's'));
+                }
+
+                if ( mins > 0){
+                    if (s.length()>0)
+                        s += ' and ';
+                     s += (mins + ' min' + (mins <= 1 ? '.' : 's.'));
+                }
+                return s;
+           }
+            
+           def timeDiffInMinutes( enddate, startdate, currdate ) {
+                if (enddate == null) 
+                    enddate = currdate 
+                return ( ( enddate.time - startdate.time) / 1000.0 / 60.0 ) as int;
+            }
+        }
+    ]]>
+    </code>
+
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.TaskList"/>
+    </pages>
+    
+</workunit>

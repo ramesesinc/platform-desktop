@@ -1,0 +1,67 @@
+<workunit>
+    <invokers>
+        <invoker type="node:dataset:open" caption="View Datasets" 
+             index="1" action="open"/>
+        
+        <invoker type="node:dataset:create" caption="Add Dataset" 
+            index="1" action="create"/>
+
+             <invoker type="formActions" caption="Show SQL" action="showSql"/>
+   </invokers>
+   
+   
+   <code>
+       <![CDATA[
+        import com.rameses.osiris2.common.*;
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        import com.rameses.client.reports.*;
+        import java.rmi.server.*;
+        
+        class DatasetView extends CRUDController {
+        
+            String serviceName = "DatasetService";
+            String entityName = "dataset";
+            String title = "Dataset";
+            
+            def paramsModel = [
+                fetchList: { o->
+                    return entity.input;
+                }
+            ] as BasicListModel;
+            
+            Map createEntity() {
+                return [objid:'DS'+new UID(), input:[], output:[]];
+            }
+            
+            def selectedInputParam;
+            def addInputParams() {
+                def h = { o->
+                    entity.input << o;
+                    paramsModel.reload();
+                }
+                return InvokerUtil.lookupOpener("formcontrol:open", [saveHandler:h] );
+            }
+            def editInputParams() {
+                def h = { o->
+                    selectedInputParam.putAll(o);
+                    paramsModel.reload();
+                }
+                return InvokerUtil.lookupOpener("formcontrol:open", [saveHandler:h,
+                    control:selectedInputParam] );
+            }
+            void removeInputParams() {
+                entity.input.remove( selectedInputParam );
+            }
+            
+            def showSql() {
+                return InvokerUtil.lookupOpener("dataset:query", [entity:entity]);
+            }
+        }
+        ]]>
+   </code>
+   <pages>
+       <page template="com.rameses.client.reports.DatasetPage" />
+   </pages>
+</workunit>

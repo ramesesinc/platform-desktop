@@ -1,0 +1,13 @@
+<workunit>
+    
+    <invokers>
+        <invoker folderid="/menu/system" action="restart" caption="Restart ... " separator="before" index="18000" target="process" icon="images/restart.png"/>
+
+        <invoker folderid="/menu/system" action="shutdown" caption="Shutdown ..." index="19000"  target="process" icon="images/shutdown.png"/>
+
+        <invoker folderid="/menu/system" action="logoff" caption="Logoff ... " separator="before" index="20000"  target="process" permission="system"/>
+    </invokers>
+    
+    <code class="system.controller.SystemExitController"/>
+
+</workunit>

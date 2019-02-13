@@ -1,0 +1,7 @@
+<workunit>
+    <invokers>
+        <invoker type="loader" caption="group-notification-loader" action="init" target="process" index="100"/>
+    </invokers>
+    
+    <code class="com.rameses.client.notification.models.GroupNotificationLoaderModel"/>
+</workunit>

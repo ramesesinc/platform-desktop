@@ -1,0 +1,14 @@
+<workunit>
+
+    <!-- to use this pass the key which is the name of the LOV -->
+    <invokers>
+        <invoker type="lov:lookup" target="popup" />
+    </invokers>
+    
+    <code class="com.rameses.osiris2.common.LOVLookupController"/>
+   
+    <pages>
+        <page template="com.rameses.osiris2.themes.LookupPage"/>
+    </pages>
+    
+</workunit>

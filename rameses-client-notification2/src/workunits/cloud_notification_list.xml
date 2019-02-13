@@ -1,0 +1,22 @@
+<workunit extends="wtemplates/ListController.xml">
+    <invokers>
+        <invoker folderid="/explorer/txn/notification" caption="Cloud Notification List" 
+            action="doInit" domain="ADMIN" role="NOTIFICATION"/>
+        
+        <invoker type="quick_launcher" code="CLNOTL" caption="Cloud Notification List" 
+            action="doInit" domain="ADMIN" role="NOTIFICATION"/>
+        
+        <invoker type="formActions" caption="Reschedule" action="reschedule" 
+            visibleWhen="#{selectedMenu?.name == 'failed'}"/> 
+        <invoker type="formActions" caption="Select All" action="selectAll" 
+            visibleWhen="#{selectedMenu?.name == 'failed'}"/>         
+        <invoker type="formActions" caption="Deselect All" action="deselectAll" 
+            visibleWhen="#{selectedMenu?.name == 'failed'}"/>                 
+    </invokers>
+    
+    <code class="com.rameses.client.notification.CloudNotificationListController"/> 
+    
+    <pages>
+        <page template="com.rameses.client.notification.NotificationListPage"/> 
+    </pages>
+</workunit>

@@ -1,0 +1,8 @@
+<workunit extends="wtemplates/InboxController.xml" serviceName="VarService" defaultFileType="var"> 
+    
+    <invokers> 
+        <invoker folderid="/explorer/setting" caption="System Variables" 
+            domain="ADMIN" role="SYSADMIN" permission="system"/> 
+    </invokers> 
+    
+</workunit>

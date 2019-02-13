@@ -1,0 +1,64 @@
+<workunit>
+    
+    <invokers>
+         <invoker type="preferences" caption="System Info" index="1"/>
+    </invokers>
+    
+    <code>
+    <![CDATA[
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.common.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.util.*;
+
+class SystemInfoController { 
+
+    @Script("User")
+    def user;
+
+    private def _items;
+
+    def buildItems() {
+        if ( !_items ) {
+            _items = user.env.collect{[ key: it.key, value: it.value ]}  
+            _items.add([key:'OS Name', value:System.getProperty('os.name')]); 
+            _items.add([key:'OS Arch', value:System.getProperty('os.arch')]); 
+            _items.add([key:'Java Version', value:System.getProperty('java.version')]); 
+            _items.add([key:'Java Home', value:System.getProperty('java.home')]); 
+
+            String usertimezone = System.getProperty('user.timezone');
+            if ( !usertimezone ) usertimezone = TimeZone.getDefault().getID(); 
+
+            _items.add([key:'Timezone', value:usertimezone]); 
+            _items.add([key:'Language', value:System.getProperty('user.language')]);   
+            _items.sort{ it.key }
+        } 
+        return _items;
+    } 
+
+    def handler = [
+        getRows: {
+            return -1;
+        },
+        getColumns : {
+            return [
+                new Column( name:"key", caption:"Key", width:100, maxWidth:150),
+                new Column( name:"value", caption:"Value", alignment:"left")
+            ]
+        },
+
+        fetchList : {o->                             
+            return buildItems();
+        }
+    ] as BasicListModel;
+
+    public void save() {}
+}
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="system.tools.ui.SystemInfoPage" />
+    </pages>
+</workunit>

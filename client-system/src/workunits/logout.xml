@@ -1,0 +1,10 @@
+<workunit>
+    
+    <!-- this loader hooks to logout session -->
+    <invokers>
+        <invoker type="loader" index="-900" action="init" permission="system" target="process"/> 
+    </invokers>
+    
+    <code class="system.controller.LogoutController"/>
+
+</workunit>

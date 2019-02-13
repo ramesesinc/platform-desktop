@@ -1,0 +1,11 @@
+<workunit>
+    <invokers>
+        <invoker type="preferences" caption="Signature Devices" action="init" index="100"/>
+    </invokers>
+    
+    <code class="com.rameses.osiris2.models.SigIdDeviceListModel"/> 
+    
+    <pages>
+        <page template="com.rameses.osiris2.views.SigIdDeviceListPage" />
+    </pages>
+</workunit>

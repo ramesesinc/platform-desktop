@@ -1,0 +1,34 @@
+<workunit>
+    
+    <invokers>
+        <invoker type="subtask:create" caption="Add Sub Task"/>
+    </invokers>
+    
+    <code>
+    <![CDATA[
+        import com.rameses.rcp.common.*;
+        import com.rameses.rcp.annotations.*;
+        import com.rameses.osiris2.client.*;
+        
+        public class SubtaskMessageComponent  {
+        
+            def message;
+            def task;
+            
+            def doOk() {
+                task.message = message;
+                return "_close";
+            }
+            def doCancel() {
+                return "_close";
+            }
+
+        }
+    ]]>
+    </code>
+
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.TaskMessage"/>
+    </pages>
+    
+</workunit>

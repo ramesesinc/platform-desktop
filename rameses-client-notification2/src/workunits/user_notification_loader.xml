@@ -1,0 +1,8 @@
+<workunit>
+    <invokers>
+        <invoker type="loader" action="init" target="process" 
+                 permission="system" index="100"/>
+    </invokers>
+    
+    <code class="com.rameses.client.notification.models.UserNotificationLoaderModel"/>
+</workunit>

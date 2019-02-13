@@ -1,0 +1,14 @@
+<workunit>
+    <invokers>
+        <invoker type="reportActions" action="_close" caption="Close" />
+    </invokers>
+    <pages>
+        <page name="report" template="com.rameses.osiris2.reports.templates.ReportViewPage"/>
+    </pages>
+    
+</workunit>
+
+
+
+
+

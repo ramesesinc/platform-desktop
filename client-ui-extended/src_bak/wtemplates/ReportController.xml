@@ -1,0 +1,11 @@
+<workunit>
+    <invokers>
+       <invoker type="formActions" action="viewReport" caption="Next" visibleWhen="#{mode == 'initial'}" />
+       <invoker type="formActions" action="back" caption="Back" visibleWhen="#{mode != 'initial'}" />
+    </invokers>
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.ReportInitialPage" />
+        <page name="report" template="com.rameses.osiris2.common.ui.ReportPreviewPage" />
+    </pages>
+    
+</workunit>

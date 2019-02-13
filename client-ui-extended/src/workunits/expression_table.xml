@@ -1,0 +1,147 @@
+<workunit>
+    <invokers>
+        <invoker type="valuerange:editor" caption="Table Editor" target="popup" action="init"/>
+    </invokers>
+    <code>
+        <![CDATA[    
+
+        import com.rameses.rcp.annotations.*
+        import com.rameses.rcp.common.*
+        import com.rameses.osiris2.client.*
+        import com.rameses.osiris2.common.*
+        
+        
+        class ValueRangeEditorController {
+        
+            @Binding
+            def binding;
+            
+            ValueRangeModel model;
+            
+            def selectedEntry;
+            def fromValue = 0;
+            
+            //to be passed as parameter
+            def updateHandler;
+            def entries;
+            def var;
+            def vars;
+            def rangeoption = 0;
+            
+            def rangeOptions = [
+                [key:0, value:'greater than or equal to but less than'],
+                [key:1, value:'greater but less than or equal to'],
+            ];
+            
+            @PropertyChangeListener listener = [
+                "rangeoption" : { o->
+                    listModel.reloadAll();
+                }
+            ];
+            
+            void init() {
+                vars = model.getVars(); 
+                var = model.getVar();
+                rangeoption = model.getRangeoption();
+                def vals = model.getValue();
+                entries = [];
+                if(vals) {
+                    entries.addAll( vals );
+                    fromValue = entries.last()?.to;
+                }    
+            }
+
+            def getFormulaOpener() {
+                def editor = model.getExpressionEditor(selectedEntry);
+                editor.handle.updateHandler = { o->
+                    selectedEntry.value = o;
+                    listModel.refreshEditedCell();
+                }
+                return editor;
+            }
+            
+            def changeStart() {
+                def c = MsgBox.prompt( 'Enter start');
+                if(!c) return null;
+                c = new java.math.BigDecimal( c );
+                if( entries ) {
+                    if( c > entries[0].to ) throw new Exception("Invalid start. It must be lower than the first to");
+                    entries[0].from = c;
+                }    
+                else {
+                    fromValue = c;
+                }
+            }
+            
+            def listModel = [
+                onAddItem: { o->
+                    if( o.from == null ) 
+                        throw new Exception("Cannot add entry");
+                    entries << o;
+                    fromValue = o.to;
+                },
+                getColumns: {
+                    if( rangeoption != 0 ) {
+                        return [
+                            new Column(name:"from", width:100, maxWidth:200, editable:false, caption:"Greater than",typeHandler: new DecimalColumnHandler()),
+                            new Column(name:"to", width:150, maxWidth:200, editable:true, caption:"Less than or equal to", typeHandler: new DecimalColumnHandler()),
+                            new Column(name:"value", editable:true, caption:"Value Expression", textCase:'NONE', typeHandler: new OpenerColumnHandler( handler: "formulaOpener" ) )
+                        ] as Column[]
+                    }
+                    else {
+                        return [
+                            new Column(name:"from", width:150, maxWidth:200, editable:false, caption:"Greater than or equal to",typeHandler: new DecimalColumnHandler()),
+                            new Column(name:"to", width:100, maxWidth:200, editable:true, caption:"Less than", typeHandler: new DecimalColumnHandler()),
+                            new Column(name:"value", editable:true, caption:"Value Expression", textCase:'NONE',  typeHandler: new OpenerColumnHandler( handler: "formulaOpener" ) )
+                        ] as Column[]
+                    }
+                },
+                onColumnUpdate: {item, colName->
+                    if( colName == 'value' ) {
+                        if(item.from == null) item.from = fromValue;
+                        return;
+                    }    
+                    if(item.to!=null && item.to < fromValue )
+                        throw new Exception("To must be greater than " + fromValue);
+                    if(!item.from) item.from = fromValue;
+                },
+                onRemoveItem: { o->
+                    if( o != entries.last() ) {
+                        throw new Exception("Removal not allowed. Only last item can be removed");
+                    }    
+                    entries.remove(o);
+                    fromValue = entries.last()?.to;
+                },
+                fetchList: { o->
+                    return entries;
+                }
+            ] as EditorListModel;
+         
+            def doCancel() {
+                if(MsgBox.confirm('Discard changes?')) {
+                    return "_close";
+                }
+            }
+            
+            def doOk() {
+                if(!var) 
+                    throw new Exception("Please specify a variable");
+                if(!entries) 
+                    throw new Exception("Please indicate at least one entry");
+                model.setVar( var );
+                model.setValue( entries );
+                model.setRangeoption( rangeoption );
+                if(updateHandler) updateHandler( [var:var, entries: entries, rangeoption: rangeoption] );
+                return "_close";
+            }
+        }
+        
+        ]]>
+        
+    </code>
+    
+    <pages>
+        <page template="com.rameses.osiris2.common.ui.TableRangeEditor"/>
+    </pages>
+    
+</workunit>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker type="colorchooser" action="init" caption="Color Chooser" target="popup"/>
+    </invokers>
+    <code class="com.rameses.rcp.draw.models.ColorChooserModel">
+    </code>
+    <pages>
+        <page template="com.rameses.rcp.draw.views.ColorChooserPage"/>
+    </pages>
+</workunit>
