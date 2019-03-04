@@ -36,5 +36,21 @@ public class LOV  {
         return lovs.get(key);
     }
     
+    public static Object get(String key, String connection) {
+        if( connection == null || connection.trim().length() == 0 ) return get(key);
+        String skey = connection + ":" + key;
+        if(!lovs.containsKey(skey)) {
+            try {
+                LOVService lv =(LOVService)InvokerProxy.getInstance().create("LOVService", LOVService.class, connection );
+                List m = lv.getKeyValues(key);
+                lovs.put(key, m);
+                return m;
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        return lovs.get(skey);
+    }
+
     
 }

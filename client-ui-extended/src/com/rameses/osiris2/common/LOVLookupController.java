@@ -33,6 +33,8 @@ public class LOVLookupController extends LookupModel {
     private Object beforeSelectItem;
     private Object afterSelectItem;
     
+    private String connection;
+    
     /** Creates a new instance of LOVLookupController */
     public LOVLookupController() {
     }
@@ -54,7 +56,7 @@ public class LOVLookupController extends LookupModel {
     }
     
     public List fetchList(Map params) {
-        return (List)LOV.get(key);
+        return (List)LOV.get(key, connection);
     }
     
     public String getKey() {
@@ -133,4 +135,18 @@ public class LOVLookupController extends LookupModel {
             callbackProxy.invoke( afterSelectItem, fact ); 
         } 
     } 
+
+    /**
+     * @return the connection
+     */
+    public String getConnection() {
+        return connection;
+    }
+
+    /**
+     * @param connection the connection to set
+     */
+    public void setConnection(String connection) {
+        this.connection = connection;
+    }
 }

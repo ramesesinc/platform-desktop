@@ -9,11 +9,11 @@ package com.rameses.osiris2.client;
 
 import com.rameses.classutils.AnnotationFieldHandler;
 import com.rameses.classutils.ClassDef;
-import com.rameses.osiris2.Module;
 import com.rameses.osiris2.ModuleContext;
 import com.rameses.rcp.annotations.Caller;
 import com.rameses.rcp.annotations.Script;
 import com.rameses.rcp.annotations.Service;
+import com.rameses.rcp.common.MsgBox;
 import com.rameses.rcp.framework.DependencyInjector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -35,10 +35,7 @@ public class FieldInjectionHandler implements AnnotationFieldHandler
             
             //get the current module context if any to get the connection set
             if( connectionName == null || connectionName.trim().length() == 0 ) {
-                Module mod = (Module)ModuleContext.get();
-                if( mod !=null ) {
-                    connectionName = (String) mod.getProperties().get("connection");
-                } 
+                connectionName = ModuleContext.getModuleConnection();
             }
             
             if (serviceName == null || serviceName.trim().length() == 0) { 

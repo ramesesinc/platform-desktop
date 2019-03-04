@@ -26,6 +26,11 @@ public abstract class ListController extends BasicListController implements Page
     
     public abstract String getServiceName();
     
+    //newly added. override if necessary
+    public String getConnection() {
+        return null;
+    }
+    
     public String getEntityName() {
         if (wuentityName == null || wuentityName.length() == 0)
             throw new RuntimeException("Please provide an entityName");
@@ -450,7 +455,13 @@ public abstract class ListController extends BasicListController implements Page
             throw new RuntimeException("No service name specified"); 
             
         if (service == null) {
-            service = (ListService) InvokerProxy.getInstance().create(name, ListService.class);
+            String sconn = getConnection();
+            if(sconn==null || sconn.trim().length() == 0 ){
+                service = (ListService) InvokerProxy.getInstance().create(name, ListService.class);                
+            }
+            else {
+                service = (ListService) InvokerProxy.getInstance().create(name, ListService.class, sconn);                
+            }
         }
         return service;
     } 

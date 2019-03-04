@@ -182,7 +182,8 @@ class MenuCategoryModel  {
                                 sb.append("<table cellpadding=0 cellspacing=2  border=0>"); 
                                 m.subitems.each { sf->
                                     sb.append("<tr><td>")
-                                    sb.append("<a href=\"openItem\" id=\"${sf.id}\"><font size=${fontSize-1} face=\"${fontFace}\">${sf.caption}</font></a><br>" );
+                                    sb.append("<a href=\"openItem\" id=\"${sf.id}\"><font size=${fontSize-1} face=\"${fontFace}\">${sf.caption}</font></a>" );
+                                    //sb.append("&nbsp;<font size=${fontSize-1} face=\"${fontFace}\" color=\"red\">(0)</font>" );
                                     sb.append("</td></tr>")
                                 } 
                                 sb.append("</table>"); 

@@ -13,7 +13,13 @@ public class ModuleContext {
     
     protected static final ThreadLocal<Module> threadLocal = new ThreadLocal();
     
-     public static final void set(Module mod) {
+    public static String getModuleConnection() {
+        Module m = threadLocal.get();
+        if(m!=null) return (String)m.getProperties().get("connection");
+        return null;
+    }
+    
+    public static final void set(Module mod) {
         threadLocal.set(mod);
     }
     
