@@ -21,4 +21,5 @@ public @interface Service {
     String host() default "";
     String connection() default "";
     Class interfaceClass() default Object.class;
+    boolean dynamic() default false; 
 }

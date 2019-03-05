@@ -61,6 +61,10 @@ public class DocViewModel {
         this.value = value; 
     }
     
+    public boolean isContextMenuEnabled() {
+        return false; 
+    }
+    
     // <editor-fold defaultstate="collapsed" desc=" Provider interface ">
     
     public static interface Provider 

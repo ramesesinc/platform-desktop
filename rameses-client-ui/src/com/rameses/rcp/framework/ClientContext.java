@@ -126,6 +126,8 @@ public abstract class ClientContext
             try { old.eventManager.destroyEvents(); }catch(Throwable t){;} 
         } 
         
+        ClientContextHandlers.stop();
+        
         currentContext = context;        
         currentContext.eventManager = new EventManager();
         currentContext.taskManager = new TaskManager();
@@ -140,6 +142,8 @@ public abstract class ClientContext
         } catch(Throwable t) { 
             t.printStackTrace(); 
         } 
+        
+        ClientContextHandlers.load( currentContext.getClassLoader()); 
     } 
     
     public final TaskManager getTaskManager() { return taskManager; }
