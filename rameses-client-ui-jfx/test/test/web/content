@@ -1,0 +1,18 @@
+<style>
+* { font-family: Tahoma, Verdana, serif; }
+a:hover { color:green;}
+</style>
+
+<h3>Menu Category</h3>
+<br/> 
+
+<a href="" name="menu1">Menu 1</a><br/> 
+<a href="" name="menu2">Menu 2</a><br/> 
+<a href="" name="menu3">Menu 3</a><br/> 
+<a href="" name="menu4">Menu 4</a><br/> 
+
+<br/> 
+<button name="action1">Button 1</button>
+<button name="action2">Button 2</button>
+<input type="button" value="IButton 1"  name="action1"/> 
+<input type="button" value="IButton 2"  name="action1"/> 

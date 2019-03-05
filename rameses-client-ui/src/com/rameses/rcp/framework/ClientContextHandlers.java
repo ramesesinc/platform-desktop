@@ -64,6 +64,14 @@ final class ClientContextHandlers {
         for (ClientContextHandler h : values) { 
             stopImpl( h ); 
         } 
+       
+        try { 
+            exec.shutdown(); 
+        } catch(Throwable t) {
+            //do nothing 
+        }
+        
+        exec = Executors.newFixedThreadPool(100); 
     }
     
     private void stopImpl( final ClientContextHandler cch ) {
