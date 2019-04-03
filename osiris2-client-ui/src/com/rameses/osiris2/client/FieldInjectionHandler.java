@@ -13,7 +13,6 @@ import com.rameses.osiris2.ModuleContext;
 import com.rameses.rcp.annotations.Caller;
 import com.rameses.rcp.annotations.Script;
 import com.rameses.rcp.annotations.Service;
-import com.rameses.rcp.common.MsgBox;
 import com.rameses.rcp.framework.DependencyInjector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -29,6 +28,10 @@ public class FieldInjectionHandler implements AnnotationFieldHandler
     public Object getResource(Object o, Field f, Annotation a) throws Exception {
         if ( a.annotationType() == Service.class ) {
             Service s = (Service) f.getAnnotation(Service.class);
+            if ( s.dynamic()) {
+                return InvokerProxy.getDynamicServiceProxy(); 
+            }
+                        
             String serviceName = s.value();
             String hostKey = s.host();
             String connectionName = s.connection(); 

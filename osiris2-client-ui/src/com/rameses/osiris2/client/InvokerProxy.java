@@ -146,4 +146,36 @@ public class InvokerProxy  {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    public synchronized static Object getDynamicServiceProxy() { 
+        return new DynamicServiceProxy(new InvokerProxy()); 
+    } 
+    
+    public static class DynamicServiceProxy implements ServiceProxy {
+
+        private InvokerProxy proxy; 
+        
+        DynamicServiceProxy(InvokerProxy proxy) {
+            this.proxy = proxy; 
+        }
+        
+        public Object invoke(String action, Object[] params) throws Exception {
+            throw new IllegalStateException("Method not supported in DynamicServiceProxy"); 
+        }
+
+        public Object invoke(String action) throws Exception {
+            throw new IllegalStateException("Method not supported in DynamicServiceProxy"); 
+        }
+
+        public Map getConf() {
+            throw new IllegalStateException("Method not supported in DynamicServiceProxy"); 
+        }
+        
+        public Object lookup( String name ) {
+            return lookup( name, null ); 
+        }
+        public Object lookup( String name, String connection ) {
+            return proxy.create(name, null, connection); 
+        }
+    }    
 }
