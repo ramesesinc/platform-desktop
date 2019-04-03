@@ -15,6 +15,7 @@ import javafx.stage.StageStyle;
 public class JFXApp extends Application {
 
     public void start(Stage stage) throws Exception {
+        System.out.println(System.getProperty("javafx.runtime.version"));
         stage.setWidth(0);
         stage.setHeight(0);
         stage.setX(Double.MAX_VALUE);

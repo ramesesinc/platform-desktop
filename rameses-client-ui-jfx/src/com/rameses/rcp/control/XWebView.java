@@ -5,12 +5,12 @@
 package com.rameses.rcp.control;
 
 import com.rameses.common.MethodResolver;
-import com.rameses.rcp.common.DocViewModel;
 import com.rameses.rcp.common.HtmlViewModel;
 import com.rameses.rcp.common.MsgBox;
 import com.rameses.rcp.common.Opener;
 import com.rameses.rcp.common.PopupMenuOpener;
 import com.rameses.rcp.common.PropertySupport;
+import com.rameses.rcp.common.WebEngineProxy;
 import com.rameses.rcp.framework.Binding;
 import com.rameses.rcp.framework.ClientContext;
 import com.rameses.rcp.jfx.WebViewPane;
@@ -20,6 +20,7 @@ import com.rameses.rcp.util.UIControlUtil;
 import java.awt.Font;
 import java.awt.Insets;
 import java.util.Map;
+import javafx.scene.web.WebEngine;
 
 /**
  *
@@ -33,7 +34,7 @@ public class XWebView extends WebViewPane implements UIControl {
     private int stretchWidth;
     private int stretchHeight;
     
-    private DocViewModel docModel; 
+    private HtmlViewModel docModel; 
     private String visibleWhen;
     private boolean dynamic;
     
@@ -75,22 +76,30 @@ public class XWebView extends WebViewPane implements UIControl {
     }
 
     public void refresh() { 
-        DocViewModel newModel = null; 
+        HtmlViewModel newModel = null; 
         try {
             Object value = UIControlUtil.getBeanValue( this ); 
-            if (value instanceof DocViewModel) {
-                newModel = (DocViewModel) value; 
+            if (value instanceof HtmlViewModel) {
+                newModel = (HtmlViewModel) value; 
                 value = newModel.getValue();
             } 
 
-            if (newModel != null) { 
-                newModel.setProvider(new ViewProviderImpl());
+            if ( docModel != null ) { 
+                try {
+                    docModel.setProvider(null); 
+                } catch(Throwable t) {
+                    //do nothing 
+                } 
             } 
             
+            if ( newModel == null ) { 
+                newModel = new WebViewModelImpl(); 
+            } 
+            newModel.setProvider(new ViewProviderImpl()); 
+            
             docModel = newModel; 
-            if ( docModel != null ) { 
-                setContextMenuEnabled( docModel.isContextMenuEnabled()); 
-            }
+            setBindingBean( docModel ); 
+            setContextMenuEnabled( docModel.isContextMenuEnabled()); 
             loadView( value ); 
         } 
         catch(Throwable t) {
@@ -233,6 +242,10 @@ public class XWebView extends WebViewPane implements UIControl {
         } 
     }
     
+    private class WebViewModelImpl extends HtmlViewModel {
+        
+    }
+    
     // </editor-fold> 
     
     protected void processAction(String name, Map param) { 
@@ -263,4 +276,11 @@ public class XWebView extends WebViewPane implements UIControl {
             getBinding().fireNavigation( op ); 
         } 
     }    
+
+    protected void onSucceeded(WebEngine we) { 
+        if ( docModel == null ) return; 
+        
+        docModel.setWebEngine( new WebEngineProxy( we )); 
+        docModel.onCompleted(); 
+    } 
 }

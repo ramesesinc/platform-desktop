@@ -4,6 +4,7 @@
  */
 package com.rameses.rcp.jfx;
 
+import com.rameses.rcp.framework.ClientContext;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -20,12 +21,19 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
+import javafx.scene.web.PromptData;
 import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
+import javafx.util.Callback;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import netscape.javascript.JSObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -48,6 +56,7 @@ public class WebViewPane extends JPanel {
     private JLabel stat;
     
     private boolean contextMenuEnabled;
+    private Object bindingBean; 
     
     public WebViewPane() {
         initComponents();
@@ -71,17 +80,24 @@ public class WebViewPane extends JPanel {
         this.contextMenuEnabled = contextMenuEnabled; 
     }
     
-    protected void loadView( Object value ) {
+    public void setBindingBean( Object bindingBean ) { 
+        this.bindingBean = bindingBean; 
+    } 
+    
+    protected void loadView( Object value ) { 
         Platform.runLater( new WebViewLoader( value ) ); 
-    }
+    } 
     
     protected void processAction( String name, Map param ) {
     }
     
+    protected void onSucceeded( WebEngine we ) {
+    }
+        
     private void updateStat( String text ) {
         if ( text == null ) text = ""; 
         if ( text.trim().length() > 0 ) {
-            stat.setText(" "+ text +"          "); 
+            stat.setText(" "+ text +"                    "); 
         } else {
             stat.setText(""); 
         } 
@@ -128,10 +144,12 @@ public class WebViewPane extends JPanel {
             } catch (Throwable t) {
                 return null; 
             } 
-        }         
-    }
+        } 
+    } 
     
     private class WebViewLoader implements Runnable {
+        
+        WebViewPane root = WebViewPane.this;
         
         private Object value; 
         
@@ -145,13 +163,63 @@ public class WebViewPane extends JPanel {
             }
         }
         
+        private void loadFont() {
+            try {
+                URL url = ClientContext.getCurrentContext().getClassLoader().getResource("fonts/OpenSansRegular.ttf");  
+                System.out.println("url-> "+ url);
+                if ( url != null ) { 
+                    Font.loadFont( url.openStream(), 12 ); 
+                } 
+            } catch(Throwable t) {
+                t.printStackTrace();
+            }
+        }
+        
         private void runImpl() {
+            if (value == null) value = "";
+            if (value.toString().length() > 0) {
+                updateStat("Processing request..."); 
+            } else {
+                updateStat(""); 
+            }
+            
             if ( wv == null ) {
+                //loadFont();
                 wv = new WebView(); 
+                wv.getEngine().setOnAlert(new EventHandler() {
+                    public void handle(javafx.event.Event t) {
+                        if ( t instanceof WebEvent ) {
+                            WebEvent we = (WebEvent) t; 
+                            Object msg = we.getData()+""; 
+                            JOptionPane.showMessageDialog(
+                                root, msg, "Message", 
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                        }
+                    }
+                }); 
+                wv.getEngine().setConfirmHandler(new Callback() {
+                    public Object call(Object p) {
+                        int opt = JOptionPane.showConfirmDialog(root, (p+""), "Confirm", JOptionPane.YES_NO_OPTION); 
+                        return ( opt == JOptionPane.YES_OPTION ); 
+                    } 
+                }); 
+                wv.getEngine().setPromptHandler(new Callback() { 
+                    public Object call(Object p) {
+                        if ( p instanceof PromptData ) {
+                            PromptData pd = (PromptData) p; 
+                            return JOptionPane.showInputDialog(root, pd.getMessage()+"", pd.getDefaultValue()); 
+                        } 
+                        return null; 
+                    } 
+                }); 
+                
                 Worker worker = wv.getEngine().getLoadWorker(); 
                 worker.stateProperty().addListener(new ChangeListener() {
                     public void changed(ObservableValue ov, Object oldValue, Object newValue) {
-                        //System.out.println("working... "+ newValue.toString());
+                        
+                        WebEngine we = wv.getEngine();
+                        
                         if ( newValue == Worker.State.READY ) {
                             updateStat("Connecting..."); 
                         }
@@ -165,30 +233,49 @@ public class WebViewPane extends JPanel {
                             updateStat("Cancelled"); 
                         }
                         else if ( newValue == Worker.State.FAILED ) {
-                            updateStat("Failed"); 
+                            Throwable err = we.getLoadWorker().getException(); 
+                            updateStat("Failed: "+ (err == null ? "" : err.getMessage())); 
                         }
                         
                         if ( newValue == Worker.State.SUCCEEDED ) {
-                            updateStat( null ); 
+                            updateStat("Hooking events please wait..."); 
+                            
+                            // setting of variables to the window is done here...
+                            Object owin = we.executeScript("window"); 
+                            if ( owin instanceof JSObject ) { 
+                                JSObject jso = (JSObject) owin; 
+                                jso.setMember("bindingBean", root.bindingBean); 
+                            }
+                            
                             Document doc = wv.getEngine().getDocument(); 
                             hookActionEvent( doc.getElementsByTagName("a")); 
                             hookActionEvent( doc.getElementsByTagName("button")); 
                             hookActionEvent( doc.getElementsByTagName("input")); 
-                        }
-                    }
-                });             
+                            updateStat( null ); 
+                            
+                            
+                            root.onSucceeded( we ); 
+                        } 
+                    } 
+                }); 
 
+                worker.messageProperty().addListener(new ChangeListener() {
+                    public void changed(ObservableValue ov, Object oldValue, Object newValue) {
+                        String msg = (newValue == null ? "" : newValue.toString()); 
+                        updateStat( msg ); 
+                    }
+                });
+                                
                 fxp.setScene(new Scene(wv)); 
             }
-
-            if (value == null) value = "";
-
+            
             StringBuilder styles = new StringBuilder(); 
             styles.append(" -fx-context-menu-enabled: "+ isContextMenuEnabled() +"; "); 
+            styles.append(" -fx-font-family: Arial; "); 
             wv.setStyle( styles.toString() );  
-
-            WebEngine we = wv.getEngine();            
-            if (value instanceof URL) {
+            
+            WebEngine we = wv.getEngine(); 
+            if (value instanceof URL) { 
                 we.load( value.toString()); 
             } 
             else if (value.toString().matches("[a-zA-Z]{1,}://.*")) {
@@ -237,7 +324,7 @@ public class WebViewPane extends JPanel {
                 e.preventDefault();
                 
                 if ( e.getTarget() instanceof Node ) {
-                    Node node = (Node) e.getTarget(); 
+                    Node node = (Node) e.getCurrentTarget();
                     NamedNodeMap attrs = node.getAttributes(); 
                     HashMap param = new HashMap();
                     for (int i=0; i<attrs.getLength(); i++) { 
@@ -261,5 +348,4 @@ public class WebViewPane extends JPanel {
             } 
         }
     } 
-    
 }
