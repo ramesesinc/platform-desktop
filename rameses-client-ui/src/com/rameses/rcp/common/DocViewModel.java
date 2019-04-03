@@ -24,6 +24,9 @@ public class DocViewModel {
     public void setProvider(DocViewModel.Provider provider) { 
         this.provider = provider; 
     } 
+    public DocViewModel.Provider getProvider() {
+        return provider; 
+    }
     
     public final boolean hasProvider() { 
         return (provider != null); 
@@ -77,7 +80,7 @@ public class DocViewModel {
         
         void load();
         void refresh();
-        void requestFocus();        
+        void requestFocus(); 
     } 
     
     // </editor-fold>

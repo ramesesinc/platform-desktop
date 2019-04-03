@@ -317,6 +317,10 @@ public class XHtmlView extends HtmlViewPane implements UIControl, ActiveControl,
             root.grabFocus(); 
             root.requestFocusInWindow(); 
         } 
+
+        public Object invokeJS(String text) {
+            return null; 
+        }
     }
     
     // </editor-fold> 
