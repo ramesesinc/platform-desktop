@@ -4,8 +4,7 @@
  */
 package com.rameses.rcp.common;
 
-import com.rameses.rcp.framework.ClientContext;
-import com.rameses.service.ScriptServiceContext;
+import com.rameses.http.HttpClient;
 import com.rameses.util.Base64Cipher;
 import com.rameses.util.Encoder;
 import java.lang.reflect.Method;
@@ -224,9 +223,10 @@ class NotifierHandlerProxy {
         private void runImpl() throws Exception {
             if ( !root.enableWS ) return; 
             
-            String basePath = root.mgr.getUriString(); 
-            if ( basePath != null && basePath.length() > 0 ) {
-                URI uri = new URI( basePath +"/"+ root.id );
+            String host = root.mgr.getHost();
+            String basePath = root.mgr.getSubscriberPath();
+            if ( host != null && host.length() > 0 && basePath != null && basePath.length() > 0 ) {
+                URI uri = new URI( "ws://"+ host +"/"+ basePath +"/"+ root.id );
                 wsclient = new WSClient( uri ); 
                 wsclient.setHandler( this ); 
                 wsclient.connect(); 
@@ -287,33 +287,12 @@ class NotifierHandlerProxy {
         }
         
         void runImpl() throws Exception {
-            ClientContext cctx = ClientContext.getCurrentContext(); 
-            Map appenv = cctx.getAppEnv();
-            Map newenv = new HashMap();
-            newenv.put("app.host",    getConf(appenv, "app.host", "localhost:8070"));
-            newenv.put("app.context", getConf(appenv, "app.context", "notification"));
-            newenv.put("app.cluster", getConf(appenv, "app.cluster", null)); 
-            newenv.put("readTimeout", getConf(appenv, "readTimeout", "60000")); 
-            
-            ScriptServiceContext ssc = new ScriptServiceContext(newenv); 
-            INotifierService svc = ssc.create("NotifierService", cctx.getHeaders(), INotifierService.class); 
-            
-            Map param = new HashMap();
-            param.put("id", root.id);
-            svc.notifyOthers( param ); 
-        }
-        
-        private String getConf(Map map, String name, Object defaultValue) {
-            Object value = (map == null ? null : map.get(name)); 
-            if (value == null) {
-                return (defaultValue == null ? null : defaultValue.toString()); 
-            } else { 
-                return value.toString(); 
+            String host = root.mgr.getHost();
+            String action = root.mgr.getPublisherPath();
+            if ( host != null && host.length() > 0 ) {
+                HttpClient c = new HttpClient("http://" + host); 
+                c.post(action, "{id:"+ root.id +"}"); 
             }
         }
-    }
-    
-    public interface INotifierService { 
-        Object notifyOthers( Object param ); 
     }
 }

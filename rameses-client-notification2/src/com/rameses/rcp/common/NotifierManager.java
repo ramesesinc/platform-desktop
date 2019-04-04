@@ -41,7 +41,9 @@ public final class NotifierManager {
         instance.notifyImpl( id ); 
     }
     
-    private String uriString;
+    private String host;
+    private String publisherPath;
+    private String subscriberPath;
     private HashMap<String,NotifierHandlerProxy> handlers; 
     
     ExecutorService executor;
@@ -55,18 +57,24 @@ public final class NotifierManager {
         ClientContext cctx = ClientContext.getCurrentContext();
         Map appenv = cctx.getAppEnv();
 
-        String host = getConf(appenv, "notifier.host", null);
+        host = getConf(appenv, "notifier.host", null);
         if ( host == null || host.length() == 0 ) {
             System.out.println("notifier.host is not set in app env"); 
         }
         else {
-            String action = getConf(appenv, "notifier.action", "notifier/subscribe");
-            uriString = "ws://"+ host + "/" + action; 
+            subscriberPath = getConf(appenv, "notifier.subscribe.action", "notifier/subscribe");
+            publisherPath = getConf(appenv, "notifier.publish.action", "notifier/publish");
         } 
     }
 
-    String getUriString() {
-        return uriString; 
+    String getHost() {
+        return host;
+    }
+    String getSubscriberPath() { 
+        return subscriberPath;
+    }
+    String getPublisherPath() { 
+        return publisherPath;
     }
     
     private String getConf(Map map, String name, Object defaultValue) {
