@@ -4,6 +4,8 @@
  */
 package com.rameses.rcp.common;
 
+import com.rameses.rcp.framework.ClientContext;
+import com.rameses.service.ScriptServiceContext;
 import com.rameses.util.Base64Cipher;
 import com.rameses.util.Encoder;
 import java.lang.reflect.Method;
@@ -19,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 class NotifierHandlerProxy {
     
     private final static Object LOCK = new Object();
+    
+    private final static int INTERVAL = 30;
     
     private String id; 
     private NotifierManager mgr; 
@@ -47,7 +51,7 @@ class NotifierHandlerProxy {
         if ( looper == null ) {
             looper = new Looper();
             looper.tokenid = this.id; 
-            mgr.scheduler.schedule( looper, 10, TimeUnit.SECONDS); 
+            mgr.scheduler.schedule( looper, INTERVAL, TimeUnit.SECONDS); 
         }
     }
 
@@ -80,33 +84,44 @@ class NotifierHandlerProxy {
         }
     }
     
-    void invokeHandlers() {
+    void invokeHandlers( boolean immediate ) {
         synchronized (LOCK) {
+            looper.resched = true; 
+            
+            Map param = new HashMap(); 
+            param.put("id", this.id); 
+            param.put("options", this.options); 
+            param.put("immediate", immediate); 
+            
             Wrapper[] arrs = handlers.values().toArray(new Wrapper[]{}); 
             for ( Wrapper w : arrs ) { 
-                invokeHandler( w ); 
+                invokeHandler( w, param ); 
+            } 
+            
+            if ( immediate ) { 
+                mgr.executor.submit(new Publisher());
             } 
         }
     }
-    void invokeHandler( final Wrapper w ) {
-        final Map param = new HashMap(); 
-        param.put("id", this.id); 
-        param.put("options", this.options); 
-        w.notify( param ); 
-        /*
-        Runnable run = new Runnable() {
-            public void run() { 
-                w.notify( param ); 
-            } 
-        }; 
-        this.mgr.executor.submit( run ); 
-        */
+    void invokeHandler( final Wrapper w, final Map param ) {
+        try {
+            w.notify( param ); 
+        } 
+        catch(Throwable t) {
+            t.printStackTrace(); 
+        }
     }
     
-    void notify( Object param ) {
+    void notify( Object message ) { 
+        Map param = new HashMap();
+        param.put("id", this.id); 
+        param.put("options", this.options); 
+        param.put("immediate", false); 
+        param.put("message", message); 
+        
         Wrapper[] arr = handlers.values().toArray(new Wrapper[]{}); 
         for ( Wrapper w : arr ) {
-            w.notify( param ); 
+            invokeHandler(w, param); 
         } 
     } 
     
@@ -231,19 +246,21 @@ class NotifierHandlerProxy {
         }
     }
     
-    public interface INotifierService { 
-        Object getNotified( Object param ); 
-    }
-    
     private class Looper implements Runnable {
         
         NotifierHandlerProxy root = NotifierHandlerProxy.this; 
         
         String tokenid;
+        boolean resched;
         
         public void run() { 
-            try {
-                root.invokeHandlers(); 
+            try { 
+                if ( resched ) {  
+                    resched = false; 
+                } 
+                else {
+                    root.invokeHandlers( false ); 
+                }
             } 
             catch(Throwable t) {
                 System.out.println("NotifierHandlerProxy.Looper failed caused by "+ t.getClass().getName() +": "+ t.getMessage());
@@ -251,11 +268,24 @@ class NotifierHandlerProxy {
             finally {
                 Looper req = new Looper(); 
                 req.tokenid = tokenid; 
-                root.mgr.scheduler.schedule(req, 10, TimeUnit.SECONDS); 
+                root.mgr.scheduler.schedule(req, INTERVAL, TimeUnit.SECONDS); 
             }
+        } 
+    } 
+    
+    private class Publisher implements Runnable {
+
+        NotifierHandlerProxy root = NotifierHandlerProxy.this; 
+        
+        public void run() { 
+            try { 
+                runImpl();
+            } 
+            catch(Throwable t) {
+                System.out.println("NotifierHandlerProxy.Publisher failed caused by "+ t.getClass().getName() +": "+ t.getMessage());
+            } 
         }
         
-        /*
         void runImpl() throws Exception {
             ClientContext cctx = ClientContext.getCurrentContext(); 
             Map appenv = cctx.getAppEnv();
@@ -267,10 +297,10 @@ class NotifierHandlerProxy {
             
             ScriptServiceContext ssc = new ScriptServiceContext(newenv); 
             INotifierService svc = ssc.create("NotifierService", cctx.getHeaders(), INotifierService.class); 
+            
             Map param = new HashMap();
             param.put("id", root.id);
-            param.put("tokenid", tokenid); 
-            svc.getNotified( param ); 
+            svc.notifyOthers( param ); 
         }
         
         private String getConf(Map map, String name, Object defaultValue) {
@@ -281,6 +311,9 @@ class NotifierHandlerProxy {
                 return value.toString(); 
             }
         }
-        */
+    }
+    
+    public interface INotifierService { 
+        Object notifyOthers( Object param ); 
     }
 }

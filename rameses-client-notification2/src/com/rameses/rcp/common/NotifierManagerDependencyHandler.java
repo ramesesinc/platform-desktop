@@ -15,7 +15,7 @@ import java.util.Map;
 public class NotifierManagerDependencyHandler implements DependencyHandler {
 
     public Class getAnnotation() {
-        return com.rameses.rcp.annotations.NotifierManager.class; 
+        return com.rameses.rcp.annotations.NotifierMgr.class; 
     }
 
     public Object getResource(Binding binding) {

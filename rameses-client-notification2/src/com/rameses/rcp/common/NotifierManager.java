@@ -110,7 +110,7 @@ public final class NotifierManager {
         NotifierHandlerProxy proxy = handlers.get( id ); 
         if ( proxy == null ) return; 
         
-        proxy.invokeHandlers(); 
+        proxy.invokeHandlers( true ); 
     }
     
     void detach( String id ) {
