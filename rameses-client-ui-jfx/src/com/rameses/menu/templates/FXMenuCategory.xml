@@ -1,0 +1,6 @@
+<workunit>
+    <code class="com.rameses.menu.models.FXMenuCategoryModel" />
+    <pages>
+        <page template="com.rameses.menu.views.FXMenuCategoryPage"/> 
+    </pages>
+</workunit>

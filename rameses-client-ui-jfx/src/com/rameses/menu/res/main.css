@@ -1,0 +1,100 @@
+* {
+    font-family: Dialog;
+}
+.menu{
+    float: left;
+    padding-left: 30px;
+    margin-top: 30px;
+}
+.link{
+    color: #0B76CA;
+}
+.link:hover{
+    color: #0E6505;
+}
+.link:hover .raquo{
+    visibility: visible;
+}
+.link div {
+    margin-left: -13px;
+    display: inline-block;
+}
+.link .raquo{ 
+    float:left; 
+    width:5%; 
+    margin-right:12px; 
+    visibility: hidden; 
+}
+.link .label{
+    width:95%;
+}
+.icon{
+    width: 20%;
+    float: left;
+}
+.category{
+    width: 80%;
+    float: right;
+    padding-bottom: 20px;
+}
+.msgcount {
+    background-color: red;
+    padding: 4px;
+    margin-left: 5px;
+    border-radius: 100%;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+@media(min-width:380px){
+    .menu{
+        width: 100%;
+        float: left;
+        padding-left: 30px;
+        margin-top: 30px;
+        min-width: 100px;
+    }
+    .menu h1{
+        font-size: 22px;
+        margin: 0px;
+    }
+}
+
+@media(min-width:792px){
+    .menu{
+        width: 45%;
+        float: left;
+        padding-left: 30px;
+        margin-top: 30px;
+    }
+    .menu h1{
+        font-size: 22px;
+        margin: 0px;
+    }
+
+}
+@media(min-width:992px){
+    .menu{
+        width: 25%;
+        float: left;
+        padding-left: 30px;
+        margin-top: 30px;
+    }
+    .menu h1{
+        font-size: 22px;
+        margin: 0px;
+    }
+}
+@media(min-width:1200px){
+    .menu{
+        width: 25%;
+        float: left;
+        padding-left: 30px;
+        margin-top: 30px;
+    }
+    .menu h1{
+        font-size: 22px;
+        margin: 0px;
+    }
+}
