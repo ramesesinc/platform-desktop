@@ -5,12 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- *
- * @author ramesesinc
- */
+
 @Retention(value=RetentionPolicy.RUNTIME)
 @Target(value=ElementType.FIELD)
-public @interface NotifierManager {
+public @interface NotifierMgr {
     
 }
