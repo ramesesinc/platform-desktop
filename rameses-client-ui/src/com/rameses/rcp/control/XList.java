@@ -22,6 +22,7 @@ import com.rameses.rcp.ui.UIControl;
 import com.rameses.rcp.util.UIControlUtil;
 import com.rameses.util.BreakException;
 import com.rameses.util.ValueUtil;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -47,6 +48,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
@@ -93,6 +95,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
     private RefreshTask refreshTask;
     
     public XList() {
+        super(); 
         super.addListSelectionListener(getSelectionSupport()); 
         setCellRenderer(new DefaultCellRenderer());
         setEnableNavigation(true); 
@@ -463,7 +466,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
             } catch(Throwable t) {
                 System.out.println("[WARN] error get bean value caused by " + t.getMessage());
             }
-            //--
+
             if (value instanceof ListPaneModel) {
                 newModel = (ListPaneModel)value;
             }        
@@ -474,7 +477,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
             } catch(Throwable t) {
                 System.out.println("[WARN] error get bean value caused by " + t.getMessage());
             }
-            //--
+
             newModel = new DefaultListPaneModel(value); 
         }
         loadItems(newModel);         
@@ -577,48 +580,75 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
     
     // <editor-fold defaultstate="collapsed" desc=" DefaultCellRenderer (class) ">
     
+    public class ItemStat {
+        public int index;
+        public boolean selected; 
+        public Object data;
+    }
+    
     private class DefaultCellRenderer implements ListCellRenderer {
+        
         XList root = XList.this; 
+        
+        private JPanel panel;
         private JLabel cellLabel;
+        private JLabel cellLabelR; 
         private FontSupport fontSupport; 
         
+        private HashMap itemObject;
+        
         DefaultCellRenderer() {
+            panel = new JPanel(new BorderLayout());
+            panel.setOpaque(true); 
+
             cellLabel = new JLabel();
-            cellLabel.setOpaque(true);
-            cellLabel.setBorder(BorderFactory.createEmptyBorder(2, 10, 2, 2));  
+            cellLabel.setOpaque(false);
+            cellLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));  
+            panel.add( cellLabel ); 
+            
+            cellLabelR = new JLabel();
+            cellLabelR.setOpaque(false); 
+            panel.add( cellLabelR, BorderLayout.EAST ); 
+            
             fontSupport = new FontSupport(); 
+            itemObject = new HashMap();
         }
         
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             Insets pads = root.getPadding();
             if (pads == null) pads = new Insets(1,3,1,3); 
 
-            cellLabel.setBorder(BorderFactory.createEmptyBorder(pads.top, pads.left, pads.bottom, pads.right)); 
-            cellLabel.setComponentOrientation(list.getComponentOrientation());
-            cellLabel.setSize(list.getFixedCellWidth(), list.getFixedCellHeight());
-            cellLabel.setEnabled(list.isEnabled());
-            cellLabel.setFont(list.getFont());
+            panel.setBorder(BorderFactory.createEmptyBorder(pads.top, pads.left, pads.bottom, pads.right)); 
+            panel.setSize(list.getFixedCellWidth(), list.getFixedCellHeight());
+            panel.setEnabled( list.isEnabled()); 
+            panel.setFont(list.getFont());
+            cellLabel.setFont( list.getFont()); 
+            cellLabelR.setFont( list.getFont()); 
             cellLabel.setVerticalAlignment(getCellVerticalAlignment());
             cellLabel.setHorizontalAlignment(getCellHorizontalAlignment());
             cellLabel.setVerticalTextPosition(getCellVerticalTextPosition());
             cellLabel.setHorizontalTextPosition(getCellHorizontalTextPosition());
-            if (cellLabel.isEnabled()) cellLabel.setEnabled(root.isEnableNavigation());
+            if (panel.isEnabled()) panel.setEnabled(root.isEnableNavigation());
             
-            if (isSelected) {
-                cellLabel.setEnabled(true); 
-                cellLabel.setBackground(list.getSelectionBackground());
-                cellLabel.setForeground(list.getSelectionForeground());
-                fontSupport.applyStyles(cellLabel, "font-weight:bold;");
-            } else {                
-                cellLabel.setBackground(list.getBackground());
-                cellLabel.setForeground(list.getForeground());
+            if (isSelected) { 
+                panel.setBackground(list.getSelectionBackground()); 
+                panel.setForeground(list.getSelectionForeground()); 
+                cellLabel.setForeground(list.getSelectionForeground()); 
+                cellLabelR.setForeground(list.getSelectionForeground()); 
+                fontSupport.applyStyles(cellLabel, "font-weight:bold;"); 
+            } else { 
+                panel.setBackground(list.getBackground());
+                panel.setForeground(list.getForeground());
+                cellLabel.setForeground(list.getForeground()); 
+                cellLabelR.setForeground(list.getForeground()); 
             }
             
             if (Beans.isDesignTime()) {
                 cellLabel.setText( value+"" );
                 return cellLabel;
             }
-            
+
+            Object statusText = null;             
             Object cellValue = value;
             String expr = getExpression();
             if (expr != null) {
@@ -628,7 +658,20 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
                 } catch(Throwable e) {;}
             } 
             
-            cellLabel.setText((cellValue == null? " ": cellValue.toString()));            
+            if ( root.listPaneModel != null ) { 
+                itemObject.put("index", index); 
+                itemObject.put("selected", isSelected); 
+                itemObject.put("data", value); 
+
+                Object txt = root.listPaneModel.buildDisplayText( itemObject ); 
+                if ( txt != null ) cellValue = txt; 
+                
+                txt = root.listPaneModel.buildStatusText( itemObject ); 
+                if ( txt != null ) statusText = txt ;
+            }
+            
+            cellLabel.setText((cellValue == null? "" : cellValue.toString())); 
+            cellLabelR.setText( statusText == null ? "" : statusText.toString()); 
             
             String strIcon = new MapObject(value).getString("icon");
             if (strIcon == null || strIcon.length() == 0) { 
@@ -643,7 +686,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
                 }
                 cellLabel.setIcon(anIcon); 
             }
-            return cellLabel;
+            return panel;
         }
         
         private Object createExpressionBean(Object itemBean) {

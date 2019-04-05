@@ -12,8 +12,6 @@ package com.rameses.rcp.common;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  *
@@ -81,7 +79,13 @@ public class ListPaneModel {
         return false;  
     }
     
-    
+    public Object buildDisplayText( Map item ) {
+        return null; 
+    }    
+    public Object buildStatusText( Map item ) {
+        return null; 
+    }
+        
     // <editor-fold defaultstate="collapsed" desc=" proxying methods ">
     
     public Object getBinding() {
