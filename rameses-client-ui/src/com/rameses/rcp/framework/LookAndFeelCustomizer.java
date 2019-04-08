@@ -4,7 +4,9 @@
  */
 package com.rameses.rcp.framework;
 
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -16,9 +18,18 @@ import javax.swing.plaf.FontUIResource;
  */
 public final class LookAndFeelCustomizer {
     
-    public static void install() { 
+    public static void install() {         
+        LookAndFeelCustomizer laf = new LookAndFeelCustomizer(); 
+
+        try {
+            if (laf.isMac()) {
+                laf.initSettingsForMac(); 
+            }
+        } catch(Throwable t) {
+            t.printStackTrace(); 
+        }
+        
         try { 
-            LookAndFeelCustomizer laf = new LookAndFeelCustomizer(); 
             laf.install0();
         } catch(Throwable t) {
             t.printStackTrace(); 
@@ -75,4 +86,26 @@ public final class LookAndFeelCustomizer {
     }
     
     private final String SPECIAL_KEYS = "ColorChooser|InternalFrame|Menu|MenuBar|MenuItem|OptionPane|RadioButtonMenuItem|TextArea|ToolTip";
+    
+    
+    private boolean isMac() {
+        String osname = System.getProperty("os.name"); 
+        if ( osname == null) return false; 
+        return osname.toLowerCase().startsWith("mac"); 
+    }
+    private void initSettingsForMac() throws Exception {
+        final Class<?> macFontFinderClass = Class.forName("com.sun.t2k.MacFontFinder");
+        final Field psNameToPathMap = macFontFinderClass.getDeclaredField("psNameToPathMap");
+
+        psNameToPathMap.setAccessible(true);
+        if (psNameToPathMap.get(null) == null) {
+            psNameToPathMap.set(null, new HashMap<String, String>());
+        }
+
+        final Field allAvailableFontFamilies = macFontFinderClass.getDeclaredField("allAvailableFontFamilies");
+        allAvailableFontFamilies.setAccessible(true);
+        if (allAvailableFontFamilies.get(null) == null) {
+            allAvailableFontFamilies.set(null, new String[] {});
+        }
+    }
 }

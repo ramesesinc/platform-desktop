@@ -21,7 +21,6 @@ public class NewEmptyJUnitTest extends TestCase {
     }
 
     public void test1() throws Exception { 
-        
         JPanel panel = new JPanel();
         panel.setLayout(new SplitterLayout());
 
