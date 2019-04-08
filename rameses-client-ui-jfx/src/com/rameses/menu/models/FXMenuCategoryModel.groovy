@@ -98,6 +98,7 @@ class FXMenuCategoryModel {
     }
     
     def buildModel() {
+        println 'build model pass 1'
         def model = [];
         
         String headMenu = getContext();
@@ -128,7 +129,9 @@ class FXMenuCategoryModel {
             }
             
             //override by extending class
+            println 'load dynamic items started'
             loadDynamicItems( m.id, m.subitems, invokers );
+            println 'load dynamic items ended'
             
             if( !m.subitems ) return;
             m.subitems = m.subitems.sort{ (!it.index) ? 0 : it.index };
@@ -146,6 +149,7 @@ class FXMenuCategoryModel {
             else {
                 i++;    
             }
+            println 'build model ended'
         }
         
         //correct the final
@@ -154,6 +158,7 @@ class FXMenuCategoryModel {
     }
     
     void render( model ) {
+        println 'render model started'
         def buff = new StringBuilder(); 
         
         model.each { row ->
@@ -184,6 +189,7 @@ class FXMenuCategoryModel {
                 return buildHtml( buff ); 
             }
         ] as HtmlViewModel 
+        println 'render model ended'
     }
 
     def openItem( param ) {
@@ -219,6 +225,7 @@ class FXMenuCategoryModel {
     }
     
     def buildHtml( content ) {
+        println 'build html started'
         String script = """ 
         <script> 
         function updateCount( elemid, value ) {
@@ -245,6 +252,7 @@ class FXMenuCategoryModel {
         buff.append( content ); 
         buff.append("</body>");
         buff.append("</html>");
+        println 'build html ended'
         return buff.toString(); 
     }
 } 
