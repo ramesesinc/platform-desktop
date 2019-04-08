@@ -7,7 +7,10 @@ package com.rameses.rcp.control;
 import com.rameses.classutils.ClassDefUtil;
 import com.rameses.common.PropertyResolver;
 import com.rameses.osiris2.AppContext;
+import com.rameses.osiris2.Module;
+import com.rameses.osiris2.ModuleContext;
 import com.rameses.osiris2.client.FieldInjectionHandler;
+import com.rameses.osiris2.client.WorkUnitUIController;
 import com.rameses.platform.interfaces.ViewContext;
 import com.rameses.rcp.common.ComponentBean;
 import com.rameses.rcp.common.PropertySupport.PropertyInfo;
@@ -536,7 +539,17 @@ public abstract class XComponentPanel extends JPanel
             throw new RuntimeException("Please provide a ComponentBean for ("+ getName() + ")");   
         } 
         
-        ClassDefUtil.getInstance().injectFields(compBean, new FieldInjectionHandler());  
+        try {
+            Module mod = ((WorkUnitUIController)getBinding().getController()).getWorkunit().getModule();
+            ModuleContext.set( mod  );
+            ClassDefUtil.getInstance().injectFields(compBean, new FieldInjectionHandler()); 
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+            ModuleContext.remove();
+        }
         return compBean; 
     }
     
