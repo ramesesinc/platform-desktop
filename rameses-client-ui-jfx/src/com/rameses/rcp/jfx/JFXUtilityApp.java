@@ -16,12 +16,15 @@ import javafx.stage.StageStyle;
 public class JFXUtilityApp extends Application {
 
     public void start(Stage stage) throws Exception {
-        stage.setWidth(0);
-        stage.setHeight(0);
-        stage.setX(Double.MAX_VALUE);
-        stage.setY(Double.MAX_VALUE);
+        System.out.println("start( Stage )...");
+        stage.setWidth(1);
+        stage.setHeight(1);
+        stage.setX(-200);
+        stage.setY(-200);
         stage.initStyle(StageStyle.UTILITY); 
+        System.out.println("before show stage...");
         stage.show(); 
+        System.out.println("after show stage...");
     } 
     
     public static void main(String[] args) { 
@@ -37,7 +40,7 @@ public class JFXUtilityApp extends Application {
             }
         }
         
-        
+        System.out.println("launch jfx application...");
         Application.launch(args); 
     }    
 }
