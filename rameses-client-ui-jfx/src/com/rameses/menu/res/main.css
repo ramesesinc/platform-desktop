@@ -1,43 +1,32 @@
-* {
-    font-family: Dialog;
-}
 .menu{
+    font-family: Arial, Dialog, serif;
     float: left;
     padding-left: 30px;
-    margin-top: 30px;
+    padding-bottom: 20px;
 }
 .link{
     color: #0B76CA;
+    text-decoration: none;
 }
 .link:hover{
-    color: #0E6505;
+    text-decoration: underline;
 }
-.link:hover .raquo{
-    visibility: visible;
-}
-.link div {
-    margin-left: -13px;
-    display: inline-block;
-}
-.link .raquo{ 
-    float:left; 
-    width:5%; 
-    margin-right:12px; 
-    visibility: hidden; 
-}
-.link .label{
-    width:95%;
+.label{
+    font-size: 14px;
 }
 .icon{
     width: 20%;
     float: left;
 }
+.icon img{
+    float: right;
+    margin-right: 8px;
+}
 .category{
     width: 80%;
     float: right;
-    padding-bottom: 20px;
 }
-.msgcount {
+.msgcount{
     background-color: red;
     padding: 4px;
     margin-left: 5px;
@@ -47,16 +36,15 @@
     font-size: 11px;
 }
 
+
 @media(min-width:380px){
     .menu{
         width: 100%;
         float: left;
         padding-left: 30px;
-        margin-top: 30px;
-        min-width: 100px;
     }
     .menu h1{
-        font-size: 22px;
+        font-size: 20px;
         margin: 0px;
     }
 }
@@ -66,10 +54,9 @@
         width: 45%;
         float: left;
         padding-left: 30px;
-        margin-top: 30px;
     }
     .menu h1{
-        font-size: 22px;
+        font-size: 25px;
         margin: 0px;
     }
 
@@ -79,10 +66,9 @@
         width: 25%;
         float: left;
         padding-left: 30px;
-        margin-top: 30px;
     }
     .menu h1{
-        font-size: 22px;
+        font-size: 25px;
         margin: 0px;
     }
 }
@@ -91,10 +77,10 @@
         width: 25%;
         float: left;
         padding-left: 30px;
-        margin-top: 30px;
     }
     .menu h1{
-        font-size: 22px;
+        font-size: 16px;
+        font-weight: bold;
         margin: 0px;
     }
 }

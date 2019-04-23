@@ -98,7 +98,6 @@ class FXMenuCategoryModel {
     }
     
     def buildModel() {
-        println 'build model pass 1'
         def model = [];
         
         String headMenu = getContext();
@@ -129,9 +128,7 @@ class FXMenuCategoryModel {
             }
             
             //override by extending class
-            println 'load dynamic items started'
             loadDynamicItems( m.id, m.subitems, invokers );
-            println 'load dynamic items ended'
             
             if( !m.subitems ) return;
             m.subitems = m.subitems.sort{ (!it.index) ? 0 : it.index };
@@ -149,7 +146,6 @@ class FXMenuCategoryModel {
             else {
                 i++;    
             }
-            println 'build model ended'
         }
         
         //correct the final
@@ -158,7 +154,6 @@ class FXMenuCategoryModel {
     }
     
     void render( model ) {
-        println 'render model started'
         def buff = new StringBuilder(); 
         
         model.each { row ->
@@ -168,11 +163,10 @@ class FXMenuCategoryModel {
                 buff.append("      <img src=\"classpath://${m.icon}\" width=\"48\" height=\"48\">"); 
                 buff.append("   </div>"); 
                 buff.append("   <div class=\"category\">"); 
-                buff.append("      <h1>${m.caption}</h1>"); 
+                buff.append("      <h1>${m.caption} XXX</h1>"); 
                 m.subitems.each { mi-> 
                     buff.append("  <div>");
                     buff.append("     <a href=\"\" class=\"link\" action=\"openItem\" id=\"${mi.id}\">");
-                    buff.append("        <div class=\"raquo\">&raquo;</div>");
                     buff.append("        <div class=\"label\"> ${mi.caption}");
                     buff.append("           <span class=\"msgcount\" id=\"${mi.id}-count\" style=\"display:none;\"></span>");
                     buff.append("        </div>");
@@ -189,7 +183,6 @@ class FXMenuCategoryModel {
                 return buildHtml( buff ); 
             }
         ] as HtmlViewModel 
-        println 'render model ended'
     }
 
     def openItem( param ) {
@@ -252,7 +245,6 @@ class FXMenuCategoryModel {
         buff.append( content ); 
         buff.append("</body>");
         buff.append("</html>");
-        println 'build html ended'
         return buff.toString(); 
     }
 } 
