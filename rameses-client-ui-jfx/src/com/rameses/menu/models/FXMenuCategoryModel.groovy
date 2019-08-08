@@ -210,11 +210,10 @@ class FXMenuCategoryModel {
                 buff.append("      <img src=\"classpath://${m.icon}\" width=\"48\" height=\"48\">"); 
                 buff.append("   </div>"); 
                 buff.append("   <div class=\"category\">"); 
-                buff.append("      <h1>${m.caption}</h1>"); 
+                buff.append("      <h1>${m.caption} XXX</h1>"); 
                 m.subitems.each { mi-> 
                     buff.append("  <div>");
                     buff.append("     <a href=\"\" class=\"link\" action=\"openItem\" id=\"${mi.id}\">");
-                    buff.append("        <div class=\"raquo\">&raquo;</div>");
                     buff.append("        <div class=\"label\"> ${mi.caption}");
                     if( mi.notificationid != null ) {
                         def elemid = com.rameses.util.Encoder.MD5.encode(''+ mi.notificationid +'-count'); 
