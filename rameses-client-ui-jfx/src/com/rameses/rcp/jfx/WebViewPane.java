@@ -4,7 +4,7 @@
  */
 package com.rameses.rcp.jfx;
 
-import com.rameses.rcp.framework.ClientContext;
+
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -23,7 +23,6 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.text.Font;
 import javafx.scene.web.PromptData;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebEvent;
@@ -84,7 +83,7 @@ public class WebViewPane extends JPanel {
         this.bindingBean = bindingBean; 
     } 
     
-    protected void loadView( Object value ) { 
+    public void loadView( Object value ) { 
         Platform.runLater( new WebViewLoader( value ) ); 
     } 
     
@@ -104,7 +103,7 @@ public class WebViewPane extends JPanel {
         fxp.repaint(); 
     }
     
-    private class JFXPanelImpl extends JFXPanel {
+    private  class JFXPanelImpl extends JFXPanel {
         
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -130,7 +129,7 @@ public class WebViewPane extends JPanel {
                 g2.fillRect(x, y, dim.width, dh);
                 g2.dispose();
             }
-
+                      
             Graphics2D g2 = (Graphics2D) g.create(); 
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);  
             g2.setColor( Color.WHITE ); 
@@ -146,6 +145,7 @@ public class WebViewPane extends JPanel {
             } 
         } 
     } 
+    
     
     private class WebViewLoader implements Runnable {
         
@@ -163,6 +163,7 @@ public class WebViewPane extends JPanel {
             }
         }
         
+        /*
         private void loadFont() {
             try {
                 URL url = ClientContext.getCurrentContext().getClassLoader().getResource("fonts/OpenSansRegular.ttf");  
@@ -174,6 +175,7 @@ public class WebViewPane extends JPanel {
                 t.printStackTrace();
             }
         }
+        */
         
         private void runImpl() {
             if (value == null) value = "";

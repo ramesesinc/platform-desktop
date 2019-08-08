@@ -18,22 +18,21 @@ import javax.swing.plaf.FontUIResource;
  */
 public final class LookAndFeelCustomizer {
     
-    public static void install() {         
+    public static void install() { 
         LookAndFeelCustomizer laf = new LookAndFeelCustomizer(); 
-
+        try { 
+            laf.install0();
+        } catch(Throwable t) {
+            t.printStackTrace(); 
+        }
+        
         try {
             if (laf.isMac()) {
                 laf.initSettingsForMac(); 
             }
         } catch(Throwable t) {
             t.printStackTrace(); 
-        }
-        
-        try { 
-            laf.install0();
-        } catch(Throwable t) {
-            t.printStackTrace(); 
-        }
+        }        
     }
     
     private void install0() {

@@ -1,9 +1,16 @@
 package com.rameses.menu.models;
 
 import com.rameses.rcp.common.*;
+import com.rameses.rcp.jfx.WebViewPane
 import com.rameses.rcp.annotations.*;
 import com.rameses.osiris2.client.*;
 import com.rameses.osiris2.common.*;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import javax.swing.JDialog;
 
 class FXMenuCategoryModel { 
 
@@ -24,6 +31,19 @@ class FXMenuCategoryModel {
     def menuHtml;
     def invokers = [:];
     
+    def notifications = [:];
+    
+    private static def notifyTask;
+    
+    public String getMenuContextName() {
+        return null;
+    }
+    
+    def _menuNotificationService;
+    public def getMenuNotificationService() {
+        def connection = invoker?.module?.properties.connection;
+        return InvokerProxy.instance.create("MenuNotificationService", null, connection );
+    }
     
     //overriddable methods
     public void loadDynamicItems( String menuContext, def subitems, def invokers ) {
@@ -92,13 +112,37 @@ class FXMenuCategoryModel {
         }
     }
     
+    
+    
     void init() {
+        //build model
         def model = buildModel();
+        if(model) {
+            //search if there are items that have a notificationid
+           model.each { mo->
+               mo.list.each { mv->
+                   mv.subitems.findAll{mvx-> mvx.notificationid!=null}.each { mmv->
+                       notifications.put( mmv.notificationid, mmv );
+                   }
+               }
+           }
+        }
+        
         render( model );
+        
+        _menuNotificationService = getMenuNotificationService();
+        if(_menuNotificationService !=null) {
+            notifyTask =  new NotifierTask(handler:updateCountHandler);
+            clientContext.getTaskManager().addTask( notifyTask );                            
+        }
+    }
+
+    @Close
+    void removeTaskOnClose() {
+        notifyTask?.cancelled = true;
     }
     
     def buildModel() {
-        println 'build model pass 1'
         def model = [];
         
         String headMenu = getContext();
@@ -123,15 +167,15 @@ class FXMenuCategoryModel {
                     mm.id = sf.toString();
                     mm.caption = sf.caption;
                     mm.index = sf.index;
+                    def notid = sf.invoker.properties?.notificationid;
+                    if(notid) mm.notificationid = notid;
                     m.subitems << mm;
                     invokers.put( mm.id, sf.invoker ); 
                 }       
             }
             
             //override by extending class
-            println 'load dynamic items started'
             loadDynamicItems( m.id, m.subitems, invokers );
-            println 'load dynamic items ended'
             
             if( !m.subitems ) return;
             m.subitems = m.subitems.sort{ (!it.index) ? 0 : it.index };
@@ -149,7 +193,6 @@ class FXMenuCategoryModel {
             else {
                 i++;    
             }
-            println 'build model ended'
         }
         
         //correct the final
@@ -158,7 +201,6 @@ class FXMenuCategoryModel {
     }
     
     void render( model ) {
-        println 'render model started'
         def buff = new StringBuilder(); 
         
         model.each { row ->
@@ -174,7 +216,10 @@ class FXMenuCategoryModel {
                     buff.append("     <a href=\"\" class=\"link\" action=\"openItem\" id=\"${mi.id}\">");
                     buff.append("        <div class=\"raquo\">&raquo;</div>");
                     buff.append("        <div class=\"label\"> ${mi.caption}");
-                    buff.append("           <span class=\"msgcount\" id=\"${mi.id}-count\" style=\"display:none;\"></span>");
+                    if( mi.notificationid != null ) {
+                        def elemid = com.rameses.util.Encoder.MD5.encode(''+ mi.notificationid +'-count'); 
+                        buff.append("<span class=\"msgcount\" id=\"${elemid}\" style=\"display:none;\"></span>");
+                    }
                     buff.append("        </div>");
                     buff.append("     </a>");
                     buff.append("  </div>");
@@ -183,13 +228,12 @@ class FXMenuCategoryModel {
                 buff.append("</div>"); 
             }
         }
-        
+        def _html = buildHtml( buff ); 
         menuHtml = [
             getValue: {
-                return buildHtml( buff ); 
+                return _html; 
             }
         ] as HtmlViewModel 
-        println 'render model ended'
     }
 
     def openItem( param ) {
@@ -225,12 +269,11 @@ class FXMenuCategoryModel {
     }
     
     def buildHtml( content ) {
-        println 'build html started'
         String script = """ 
         <script> 
         function updateCount( elemid, value ) {
             var e = \$('#' + elemid); 
-            if ( value && value > 0 ) {
+            if ( value && value > 0 ) {\n\
                 e.html(''+ value); 
                 e.show(); 
             } 
@@ -244,15 +287,57 @@ class FXMenuCategoryModel {
         def buff = new StringBuilder(); 
         buff.append("<html>");
         buff.append("<head>");
-        buff.append("<script src=\"classpath://com/rameses/menu/res/jquery.min.js\" type=\"text/javascript\"></script>"); 
-        buff.append("<link href=\"classpath://com/rameses/menu/res/main.css\" type=\"text/css\" rel=\"stylesheet\">");
+        buff.append("<script src=\"classpath://res/jquery.min.js\" type=\"text/javascript\"></script>"); 
+        buff.append("<link href=\"classpath://res/main.css\" type=\"text/css\" rel=\"stylesheet\">");
         buff.append( script ); 
         buff.append("</head>");
         buff.append("<body>");
         buff.append( content ); 
         buff.append("</body>");
         buff.append("</html>");
-        println 'build html ended'
         return buff.toString(); 
     }
+    
+    def updateCountHandler = {
+        if(notifications) {
+            def nitems = [];
+            notifications.each { k,v->
+                nitems << [id: k ];
+            }
+            def m =  _menuNotificationService.fetchNotifications([context:getMenuContextName(), items: nitems]);
+            if(m==null) throw new Exception("No result");
+            m.items.each {
+                def obj = notifications.get( it.id ); 
+                def cnt = it.count;
+                if(cnt==null) cnt = 0;
+                if( obj.count != cnt ) {
+                    obj.count = cnt;
+                    def elemid = com.rameses.util.Encoder.MD5.encode(''+ it.id +'-count'); 
+                    menuHtml.getWebEngine().call("updateCount", elemid, cnt );
+                }
+            }
+        }
+    } 
+    
 } 
+
+class NotifierTask extends com.rameses.rcp.common.ScheduledTask {
+    
+    def handler;
+    
+    
+    public long getInterval() {
+        return 5000L;
+    }
+    
+    public void execute() {
+        try {
+            handler();
+        }
+        catch(ex) {
+            cancelled = true;
+            ex.printStackTrace();
+        }
+    }
+    
+}

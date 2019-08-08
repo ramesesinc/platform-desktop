@@ -34,6 +34,7 @@ public class FXMenuCategoryPage extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
+        xWebView1.setBorder(null);
         xWebView1.setName("menuHtml"); // NOI18N
         add(xWebView1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
