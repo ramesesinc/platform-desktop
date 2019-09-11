@@ -10,7 +10,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.concurrent.LinkedBlockingQueue
 import javax.swing.JDialog;
+
+import com.rameses.client.notification.socketio.*;
 
 class FXMenuCategoryModel { 
 
@@ -31,18 +34,18 @@ class FXMenuCategoryModel {
     def menuHtml;
     def invokers = [:];
     
-    def notifications = [:];
-    
-    private static def notifyTask;
     
     public String getMenuContextName() {
         return null;
     }
     
-    def _menuNotificationService;
+    def _menuNotificationSvc;
     public def getMenuNotificationService() {
-        def connection = invoker?.module?.properties.connection;
-        return InvokerProxy.instance.create("MenuNotificationService", null, connection );
+        if(_menuNotificationSvc==null) {
+            def connection = invoker?.module?.properties.connection;
+            _menuNotificationSvc = InvokerProxy.instance.create("MenuNotificationService", null, connection );
+        }
+        return _menuNotificationSvc;
     }
     
     //overriddable methods
@@ -112,7 +115,7 @@ class FXMenuCategoryModel {
         }
     }
     
-    
+    def notifyHandlers = [:];
     
     void init() {
         //build model
@@ -122,25 +125,24 @@ class FXMenuCategoryModel {
            model.each { mo->
                mo.list.each { mv->
                    mv.subitems.findAll{mvx-> mvx.notificationid!=null}.each { mmv->
-                       notifications.put( mmv.notificationid, mmv );
+                       def eventName = mmv.event;
+                       if( !notifyHandlers.containsKey(eventName)) {
+                           def fxn = new FXMenuNotifyHandler(event: eventName);
+                           fxn.notificationService = getMenuNotificationService();
+                           notifyHandlers.put( eventName, fxn );
+                       }
+                       def nhandler = notifyHandlers.get(eventName);
+                       nhandler.add( mmv.notificationid, mmv );
                    }
                }
            }
-        }
-        
-        render( model );
-        
-        _menuNotificationService = getMenuNotificationService();
-        if(_menuNotificationService !=null) {
-            notifyTask =  new NotifierTask(handler:updateCountHandler);
-            clientContext.getTaskManager().addTask( notifyTask );                            
-        }
+        };
+        render(model);
+        notifyHandlers.each{k,v-> 
+            v.start() 
+        };
     }
 
-    @Close
-    void removeTaskOnClose() {
-        notifyTask?.cancelled = true;
-    }
     
     def buildModel() {
         def model = [];
@@ -168,7 +170,14 @@ class FXMenuCategoryModel {
                     mm.caption = sf.caption;
                     mm.index = sf.index;
                     def notid = sf.invoker.properties?.notificationid;
-                    if(notid) mm.notificationid = notid;
+                    if(notid) {
+                        mm.notificationid = notid;
+                    }
+                    def event = sf.invoker.properties?.event;
+                    if( event ) {
+                        mm.event = event;
+                    }
+                    mm.domain = sf.invoker.domain;
                     m.subitems << mm;
                     invokers.put( mm.id, sf.invoker ); 
                 }       
@@ -210,7 +219,7 @@ class FXMenuCategoryModel {
                 buff.append("      <img src=\"classpath://${m.icon}\" width=\"48\" height=\"48\">"); 
                 buff.append("   </div>"); 
                 buff.append("   <div class=\"category\">"); 
-                buff.append("      <h1>${m.caption} XXX</h1>"); 
+                buff.append("      <h1>${m.caption}</h1>"); 
                 m.subitems.each { mi-> 
                     buff.append("  <div>");
                     buff.append("     <a href=\"\" class=\"link\" action=\"openItem\" id=\"${mi.id}\">");
@@ -231,6 +240,15 @@ class FXMenuCategoryModel {
         menuHtml = [
             getValue: {
                 return _html; 
+            },
+            onCompleted: {
+                notifyHandlers.each {k,v->
+                    v.renderHandler = { id, cnt->
+                        menuHtml.getWebEngine().call("updateCount", id, cnt );     
+                    }
+                    v.init();
+                }
+                //complete rendering...
             }
         ] as HtmlViewModel 
     }
@@ -273,7 +291,7 @@ class FXMenuCategoryModel {
         function updateCount( elemid, value ) {
             var e = \$('#' + elemid); 
             if ( value && value > 0 ) {\n\
-                e.html(''+ value); 
+                e.html(' ('+ value +')' ); 
                 e.show(); 
             } 
             else {
@@ -297,46 +315,64 @@ class FXMenuCategoryModel {
         return buff.toString(); 
     }
     
-    def updateCountHandler = {
-        if(notifications) {
-            def nitems = [];
-            notifications.each { k,v->
-                nitems << [id: k ];
-            }
-            def m =  _menuNotificationService.fetchNotifications([context:getMenuContextName(), items: nitems]);
-            if(m==null) throw new Exception("No result");
-            m.items.each {
-                def obj = notifications.get( it.id ); 
-                def cnt = it.count;
-                if(cnt==null) cnt = 0;
-                if( obj.count != cnt ) {
-                    obj.count = cnt;
-                    def elemid = com.rameses.util.Encoder.MD5.encode(''+ it.id +'-count'); 
-                    menuHtml.getWebEngine().call("updateCount", elemid, cnt );
-                }
-            }
-        }
-    } 
+    @Close
+    void onClose() {
+        notifyHandlers.each{k,v-> v.stop(); };    
+    }
     
 } 
 
-class NotifierTask extends com.rameses.rcp.common.ScheduledTask {
+class FXMenuNotifyHandler {
+
+    String event;
+    def dataHandler;
+    def notifications = [:];
+    def menuHtml;
+    def notificationService;
+    def renderHandler;
     
-    def handler;
+    public void add(String id, def obj) {
+        notifications.put(id, obj);
+    }
+
+    //boolean refreshingScreen = false;
+    //def blockingQueue = new LinkedBlockingQueue();
+    def notifyHandler = [
+        onMessage: { msg ->
+            def itms = [];
+            notifications*.value.each {
+                itms << [id: it.notificationid, domain: it.domain, count: 0 ];
+            }
+            def result = notificationService.fetchNotifications([event:event, items: itms ]);
+            result.each {
+                def obj = notifications.get( it.id ); 
+                if(obj) {
+                    obj.count = it.count;
+                    if(obj.count==null) obj.count = 0;
+                    def elemid = com.rameses.util.Encoder.MD5.encode(''+ it.id +'-count'); 
+                    renderHandler( elemid, obj.count );
+                }
+            }
+            //blockingQueue.put(msg);
+            //if(!refreshingScreen) return;
+            //while(!blockingQueue.empty()) {
+            //    blockingQueue.void(); //clear all elements
+            //updateCountHandler();
+            //}
+            //refreshingScreen = false;
+        }
+    ] as DefaultNotificationHandler;
     
-    
-    public long getInterval() {
-        return 5000L;
+    public void start() {
+        TaskNotificationClient.getInstance().register(event, notifyHandler );
     }
     
-    public void execute() {
-        try {
-            handler();
-        }
-        catch(ex) {
-            cancelled = true;
-            ex.printStackTrace();
-        }
+    public void init() {
+        TaskNotificationClient.getInstance().send(event, [:]);
     }
     
+    public void stop() {
+        println  " stop listening in fx menu category " + event;        
+        TaskNotificationClient.getInstance().unregister( notifyHandler );
+    }
 }
