@@ -14,6 +14,8 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -228,6 +230,73 @@ public class UIControllerPanel extends JPanel
             t.printStackTrace();
         }
     } 
+    
+    public void buildFormAttrs( Map props ) {
+        UIControllerContext uicc = getCurrentController(); 
+        UIViewPanel uivp = (uicc == null ? null : uicc.getCurrentView());
+        Binding binding = (uivp == null ? null : uivp.getBinding()); 
+        Object bean = (binding == null ?  null : binding.getBean()); 
+        if ( bean == null ) return; 
+        
+        Map newmap = new HashMap();
+        loadFormPropertiesFromAnnotation( newmap, bean, bean.getClass()); 
+        props.putAll( newmap ); 
+    } 
+    
+    private void loadFormPropertiesFromAnnotation( Map props, Object bean, Class beanClass ) {
+        for (Field f: beanClass.getDeclaredFields()) {
+            boolean accessible = f.isAccessible();
+            try {
+                if (f.isAnnotationPresent(com.rameses.rcp.annotations.FormId.class)) {
+                    f.setAccessible(true);
+                    
+                    Object o = props.get("id"); 
+                    if ( o == null || o.toString().trim().length() == 0 ) {
+                        props.put("id", f.get(bean));
+                    }                    
+                } 
+                else if (f.isAnnotationPresent(com.rameses.rcp.annotations.FormTitle.class)) {
+                    f.setAccessible(true);
+                    
+                    Object o = props.get("title"); 
+                    if ( o == null || o.toString().trim().length() == 0 ) { 
+                        props.put("title", f.get(bean));
+                    }
+                } 
+            } catch(Throwable ex) {;}
+
+            f.setAccessible(accessible); 
+        }
+
+        for (Method m: beanClass.getDeclaredMethods()) {
+            boolean accessible = m.isAccessible();                
+            try {
+                if (m.isAnnotationPresent(com.rameses.rcp.annotations.FormId.class)) {
+                    m.setAccessible(true);
+
+                    Object o = props.get("id"); 
+                    if ( o == null || o.toString().trim().length() == 0 ) {
+                        props.put("id", m.invoke(bean, new Object[]{}));
+                    } 
+                } 
+                else if (m.isAnnotationPresent(com.rameses.rcp.annotations.FormTitle.class)) {
+                    m.setAccessible(true);
+
+                    Object o = props.get("title"); 
+                    if ( o == null || o.toString().trim().length() == 0 ) {
+                        props.put("title", m.invoke(bean, new Object[]{}));
+                    } 
+                } 
+            } catch(Throwable ex) {;}
+
+            m.setAccessible(accessible); 
+        }            
+
+        Class superClass = beanClass.getSuperclass();
+        if (superClass != null) {
+            loadFormPropertiesFromAnnotation(props, bean, superClass);
+        }
+    }
     
     // <editor-fold defaultstate="collapsed" desc=" ContentPane.View ">
     

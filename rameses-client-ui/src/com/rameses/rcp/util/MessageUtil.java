@@ -39,7 +39,17 @@ public class MessageUtil {
         return defaultMsg;
     }
     
-    public static Exception getErrorMessage(Exception e) {
+    public static Exception getErrorMessage(Exception e) { 
+        if ( e instanceof BusinessException ) {
+            BusinessException be = (BusinessException) e;
+            String errno = be.getErrno();
+            String msg = getMessage(errno, be.getMessage(), "errors");
+            return new Exception(msg, be);
+        } 
+        return e; 
+    } 
+    
+    public static Throwable getErrorMessage(Throwable e) {
         if ( e instanceof BusinessException ) {
             BusinessException be = (BusinessException) e;
             String errno = be.getErrno();
@@ -47,6 +57,5 @@ public class MessageUtil {
             return new Exception(msg, be);
         }
         return e;
-    }
-    
+    } 
 }

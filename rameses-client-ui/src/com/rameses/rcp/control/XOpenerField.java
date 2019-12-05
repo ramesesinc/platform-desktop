@@ -15,6 +15,7 @@ import com.rameses.rcp.common.LookupOpenerSupport;
 import com.rameses.rcp.common.MsgBox;
 import com.rameses.rcp.common.Opener;
 import com.rameses.rcp.common.PropertySupport;
+import com.rameses.rcp.common.WindowUtil;
 import com.rameses.rcp.constant.TextCase;
 import com.rameses.rcp.constant.TrimSpaceOption;
 import com.rameses.rcp.control.table.ExprBeanSupport;
@@ -354,19 +355,17 @@ public class XOpenerField extends DefaultTextField implements UIInput,
         if ( platform.isWindowExists(ctxId) ) return;
 
         UIControllerPanel uipanel = new UIControllerPanel(uicontext);
-        Map props = new HashMap();
+        Map props = new HashMap(); 
+
+        try {
+            Map openerProps = opener.getProperties();
+            props.putAll( WindowUtil.extractWindowAttrs( openerProps ) );  
+        } 
+        catch(Throwable t){;} 
+
         props.put("id", ctxId);
         props.put("title", uicontext.getTitle());
-
-        try 
-        {
-            Map openerProps = opener.getProperties();
-            props.put("width", openerProps.get("width"));
-            props.put("height", openerProps.get("height"));
-        } 
-        catch(Exception ex){
-        } 
-
+        
         callbackHandler.setStatus(callbackHandler.READY);
         platform.showPopup(this, uipanel, props); 
     }

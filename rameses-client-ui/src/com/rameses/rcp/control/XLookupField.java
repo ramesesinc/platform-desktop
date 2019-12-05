@@ -12,6 +12,7 @@ import com.rameses.rcp.common.MsgBox;
 import com.rameses.rcp.common.Opener;
 import com.rameses.rcp.common.PropertySupport;
 import com.rameses.rcp.common.SimpleLookupDataSource;
+import com.rameses.rcp.common.WindowUtil;
 import com.rameses.rcp.constant.TextCase;
 import com.rameses.rcp.constant.TrimSpaceOption;
 import com.rameses.rcp.control.table.ExprBeanSupport;
@@ -505,19 +506,18 @@ public class XLookupField extends IconedTextField implements UILookup, UISelecto
                 UIControllerPanel lookupPanel = new UIControllerPanel(uic);
                 new WindowSupport().install(lookupPanel); 
                 
-                Map props = new HashMap();
-                props.put("id", conId);
-                props.put("title", uic.getTitle());
-                
+                Map props = new HashMap();                 
                 try {
                     Map openerProps = lookupHandlerProxy.opener.getProperties(); 
-                    props.put("width", openerProps.get("width"));
-                    props.put("height", openerProps.get("height"));
-                } catch(Exception ex) {;} 
-                
+                    props = WindowUtil.extractWindowAttrs( openerProps ); 
+                } catch(Throwable ex) {;} 
+
+                props.put("id", conId);
+                props.put("title", uic.getTitle());                
                 platform.showPopup(this, lookupPanel, props);
-            }
-        } catch( Exception e ) {
+            } 
+        } 
+        catch( Throwable e ) { 
             MsgBox.err(e); 
             getInputVerifierProxy().setEnabled(true); 
         } 

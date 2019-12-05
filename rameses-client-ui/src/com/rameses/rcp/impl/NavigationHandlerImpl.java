@@ -11,6 +11,7 @@ import com.rameses.rcp.ui.UIControl;
 import com.rameses.util.ValueUtil;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.util.*;
 import javax.swing.JComponent;
 
@@ -123,10 +124,13 @@ public class NavigationHandlerImpl implements NavigationHandler {
                         return; 
                     }
                     
-                    if ( "popup".equals(opTarget) ) {
-                        platform.showPopup(sourceComp, uic, props);
+                    if ( "popup".equals(opTarget) ) { 
+                        uic.buildFormAttrs( props ); 
+                        props.putAll( WindowUtil.extractWindowAttrs( props )); 
+                        platform.showPopup(sourceComp, uic, props); 
                         
-                    } else if ( opener instanceof FloatingOpener ) {
+                    } 
+                    else if ( opener instanceof FloatingOpener ) {
                         FloatingOpener fo = (FloatingOpener) opener;
                         JComponent owner = (JComponent) source.getBinding().find( fo.getOwner() );
                         if ( !ValueUtil.isEmpty(fo.getOrientation()) ) 
@@ -134,8 +138,11 @@ public class NavigationHandlerImpl implements NavigationHandler {
                         
                         platform.showFloatingWindow(owner, uic, props);
                         
-                    } else {
-                        platform.showWindow(sourceComp, uic, props);
+                    } 
+                    else {
+                        uic.buildFormAttrs( props ); 
+                        props.putAll( WindowUtil.extractWindowAttrs( props )); 
+                        platform.showWindow(sourceComp, uic, props); 
                     }
                     
                     return;

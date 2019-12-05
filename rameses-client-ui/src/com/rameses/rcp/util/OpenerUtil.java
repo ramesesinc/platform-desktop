@@ -12,6 +12,7 @@ package com.rameses.rcp.util;
 import com.rameses.platform.interfaces.Platform;
 import com.rameses.rcp.common.LookupOpenerSupport;
 import com.rameses.rcp.common.Opener;
+import com.rameses.rcp.common.WindowUtil;
 import com.rameses.rcp.framework.UIController;
 import com.rameses.rcp.framework.UIControllerContext;
 import com.rameses.rcp.framework.UIControllerPanel;
@@ -56,25 +57,17 @@ public class OpenerUtil
             windowOptions = opener.getProperties();
         } 
         
-        Map props = opener.getProperties();
-        if (hasValue(windowOptions, "title")) {
-            opener.setCaption(getString(windowOptions, "title"));
-            props.put("title", opener.getCaption());
-        } 
-        if (hasValue(windowOptions, "width")) {
-            props.put("width", windowOptions.get("width"));
-        } 
-        if (hasValue(windowOptions, "height")) {
-            props.put("height", windowOptions.get("height"));
-        } 
-        if (hasValue(windowOptions, "resizable")) {
-            props.put("resizable", windowOptions.get("resizable"));
-        } 
-        if (hasValue(windowOptions, "alwaysOnTop")) {
-            props.put("alwaysOnTop", windowOptions.get("alwaysOnTop"));
-        } 
-        if (hasValue(windowOptions, "undecorated")) {
-            props.put("undecorated", windowOptions.get("undecorated"));
+        Map props = new HashMap();
+        Map opmap = opener.getProperties();
+        if ( opmap != null ) {
+            props.putAll( opmap ); 
+            props.putAll( WindowUtil.extractWindowAttrs( opmap )); 
+        }
+        
+        props.putAll( WindowUtil.extractWindowAttrs( windowOptions )); 
+        
+        if (hasValue(props, "title")) {
+            opener.setCaption(getString(props, "title"));
         } 
         
         opener = ControlSupport.initOpener(opener, null); 
@@ -120,6 +113,8 @@ public class OpenerUtil
         }
 
         uicp.putClientProperty("Opener.properties", map); 
+        uicp.buildFormAttrs( map ); 
+        
         if ("popup".equals(target) ) {
             platform.showPopup(null, uicp, map);
         } else {

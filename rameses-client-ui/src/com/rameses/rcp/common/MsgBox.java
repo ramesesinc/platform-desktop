@@ -28,14 +28,19 @@ public final class MsgBox {
         }
     }    
     
-    public static void err(Exception e) { 
-        Exception cause = MessageUtil.getErrorMessage(e); 
+    public static void err(Throwable e) { 
+        Throwable cause = MessageUtil.getErrorMessage(e); 
         String errmsg = cause.getMessage()+""; 
         int idx = errmsg.indexOf("Exception:"); 
         if ( idx > 0 ) {
             errmsg = errmsg.substring(idx+10); 
         }
         ClientContext.getCurrentContext().getPlatform().showError(null, new Exception(errmsg,e));
+    }
+    
+    public static void err(Exception e) { 
+        Throwable t = (Throwable) e; 
+        err( t );
     }
     
     public static void err( Exception e, String message ) { 
@@ -54,7 +59,7 @@ public final class MsgBox {
     public static void err( Object message ) { 
         if ( message instanceof Throwable ) {
             Throwable t = (Throwable) message; 
-            err( new Exception( t.getMessage(), t) ); 
+            err( t ); 
             
         } else {
             String errmsg = (message==null? "null": message.toString());

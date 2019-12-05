@@ -13,6 +13,7 @@ import com.rameses.platform.interfaces.Platform;
 import com.rameses.rcp.framework.UIController;
 import com.rameses.rcp.framework.UIControllerContext;
 import com.rameses.rcp.framework.UIControllerPanel;
+import com.rameses.rcp.framework.UIViewPanel;
 import com.rameses.rcp.impl.ClientContextImpl;
 import com.rameses.rcp.util.ControlSupport;
 import com.rameses.util.ValueUtil;
@@ -54,35 +55,30 @@ public final class Modal
     }  
     
     private void showImpl(Opener opener, Map windowOptions) {
-        if (windowOptions == null) windowOptions = new HashMap(); 
+        if (windowOptions == null) {
+            windowOptions = new HashMap();
+        } 
         
-        Map props = opener.getProperties();
+        Map props = new HashMap();
+        Map opmap = opener.getProperties();
+        if ( opmap != null ) { 
+            props.putAll( opmap ); 
+            props.putAll( WindowUtil.extractWindowAttrs( opmap ) );  
+        }
+        
         props.remove("windowmode");
-        props.put("modal", true);         
-        if (hasValue(windowOptions, "title")) {
-            opener.setCaption(getString(windowOptions, "title"));
-            props.put("title", opener.getCaption());
-        } 
-        if (hasValue(windowOptions, "width")) {
-            props.put("width", windowOptions.get("width"));
-        } 
-        if (hasValue(windowOptions, "height")) {
-            props.put("height", windowOptions.get("height"));
-        } 
-        if (hasValue(windowOptions, "resizable")) {
-            props.put("resizable", windowOptions.get("resizable"));
-        } 
-        if (hasValue(windowOptions, "alwaysOnTop")) {
-            props.put("alwaysOnTop", windowOptions.get("alwaysOnTop"));
-        } 
-        if (hasValue(windowOptions, "undecorated")) {
-            props.put("undecorated", windowOptions.get("undecorated"));
-        } 
+        props.put("modal", true); 
+        props.putAll( WindowUtil.extractWindowAttrs( windowOptions ) );  
         
         opener.setTarget("popup");
         opener = ControlSupport.initOpener(opener, null); 
         
         String sid = opener.getController().getId();
+        Object wid = props.get("windowid"); 
+        if ( wid != null && wid.toString().trim().length() > 0 ) {
+            sid = wid.toString(); 
+        }
+        
         Platform platform = ClientContextImpl.getCurrentContext().getPlatform();
         if (platform.isWindowExists(sid)) {
             platform.activateWindow(sid);
@@ -104,12 +100,10 @@ public final class Modal
             }
         }
         
-        Map map = new HashMap();
-        map.putAll(props); 
-        map.put("id", sid);
-        map.put("immediate", true); 
-        if (map.get("title") == null) {
-            map.put("title", opener.getCaption()); 
+        props.put("id", sid);
+        props.put("immediate", true); 
+        if (props.get("title") == null) {
+            props.put("title", opener.getCaption()); 
         }
                 
         UIControllerContext uicx = new UIControllerContext(uic);
@@ -121,9 +115,10 @@ public final class Modal
             uicx.setCurrentView( opener.getOutcome() );
         }
         
-        UIControllerPanel uicp = new UIControllerPanel(uicx);        
-        uicp.putClientProperty("Opener.properties", map); 
-        platform.showPopup(null, uicp, map);
+        UIControllerPanel uicp = new UIControllerPanel(uicx); 
+        uicp.putClientProperty("Opener.properties", props); 
+        uicp.buildFormAttrs( props ); 
+        platform.showPopup(null, uicp, props);
     } 
     
     private String getString(Map map, String name) {
