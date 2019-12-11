@@ -252,18 +252,25 @@ public class UIControllerPanel extends JPanel
                     
                     Object o = props.get("id"); 
                     if ( o == null || o.toString().trim().length() == 0 ) {
-                        props.put("id", f.get(bean));
-                    }                    
+                        o = f.get(bean);                        
+                    } 
+                    if ( o != null && o.toString().trim().length() > 0 ) {
+                        props.put("id", o);
+                    }
                 } 
                 else if (f.isAnnotationPresent(com.rameses.rcp.annotations.FormTitle.class)) {
                     f.setAccessible(true);
                     
                     Object o = props.get("title"); 
                     if ( o == null || o.toString().trim().length() == 0 ) { 
-                        props.put("title", f.get(bean));
+                        o = f.get(bean);  
+                    }
+                    if ( o != null && o.toString().trim().length() > 0 ) {
+                        props.put("title", o);
                     }
                 } 
-            } catch(Throwable ex) {;}
+            } 
+            catch(Throwable ex) {;}
 
             f.setAccessible(accessible); 
         }
@@ -276,16 +283,22 @@ public class UIControllerPanel extends JPanel
 
                     Object o = props.get("id"); 
                     if ( o == null || o.toString().trim().length() == 0 ) {
-                        props.put("id", m.invoke(bean, new Object[]{}));
+                        o = m.invoke(bean, new Object[]{}); 
                     } 
+                    if ( o != null && o.toString().trim().length() > 0 ) {                    
+                        props.put("id", o);
+                    }
                 } 
                 else if (m.isAnnotationPresent(com.rameses.rcp.annotations.FormTitle.class)) {
                     m.setAccessible(true);
 
                     Object o = props.get("title"); 
                     if ( o == null || o.toString().trim().length() == 0 ) {
-                        props.put("title", m.invoke(bean, new Object[]{}));
+                        o = m.invoke(bean, new Object[]{});
                     } 
+                    if ( o != null && o.toString().trim().length() > 0 ) {                    
+                        props.put("title", o);
+                    }
                 } 
             } catch(Throwable ex) {;}
 
