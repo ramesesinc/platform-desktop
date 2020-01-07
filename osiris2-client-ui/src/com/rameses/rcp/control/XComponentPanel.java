@@ -279,29 +279,28 @@ public abstract class XComponentPanel extends JPanel
         getControlProperty().setRequired( required );
     }
     
-    public final void validateInput() { 
+    public void validateInput() { 
+        ControlProperty property = getControlProperty();
+        property.setErrorMessage(null); 
+
         if ( !isRequired() ) return;
-        
+
         ActionMessage am = getActionMessage(); 
         am.clearMessages(); 
         
-        ActionMessage am0 = new ActionMessage();
-        ControlProperty property = getControlProperty();
-        property.setErrorMessage(null);
-        if ( ValueUtil.isEmpty( getValueImpl() ) ) {
-            if (isRequired()) {
-                am0.addMessage("1001", "{0} is required.", new Object[] { getCaption() });
-            } 
+        Binding innerBinding = (compBean == null ? null : compBean.getBinding()); 
+        if ( innerBinding != null ) { 
+            innerBinding.validate( actionMessage ); 
         }
-        if ( am0.hasMessages() ) { 
-            am.addMessage( am0 ); 
-            property.setErrorMessage( am0.toString() );
+
+        ActionMessage am2 = new ActionMessage();
+        validateInput( am2 );
+        if ( am2.hasMessages() ) {
+            am.addMessage( am2 ); 
         } 
         
-        ActionMessage am1 = new ActionMessage();
-        validateInput( am1 );
-        if ( am1.hasMessages() ) {
-            am.addMessage( am1 ); 
+        if ( am.hasMessages() ) { 
+            property.setErrorMessage( am.toString() );
         } 
     }
     public void validateInput( ActionMessage am ) { 
