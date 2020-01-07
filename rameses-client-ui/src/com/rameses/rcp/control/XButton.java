@@ -13,12 +13,16 @@ import com.rameses.rcp.framework.Binding;
 import com.rameses.rcp.support.FontSupport;
 import com.rameses.rcp.support.MouseEventSupport;
 import com.rameses.rcp.ui.UICommand;
+import com.rameses.rcp.ui.UIInput;
 import com.rameses.rcp.util.UIControlUtil;
+import com.rameses.rcp.util.UIInputUtil;
 import com.rameses.util.ValueUtil;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,10 +33,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -299,7 +306,11 @@ public class XButton extends JButton implements UICommand, ActionListener,
             return; 
         }
         
-        final Object outcome = UICommandUtil.processAction(this); 
+        if ( !isFocusable() ) {
+            commitFocusOwner(); 
+        }
+        
+        final Object outcome = UICommandUtil.processAction(this); ;
         if (outcome instanceof PopupMenuOpener) {
             PopupMenuOpener menu = (PopupMenuOpener) outcome;
             List items = menu.getItems();
@@ -321,6 +332,28 @@ public class XButton extends JButton implements UICommand, ActionListener,
             }
         }     
     }   
+    
+    private void commitFocusOwner() {
+        Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();         
+        if ( fo == null || !fo.isEnabled()) return;
+        if ( !(fo instanceof UIInput )) return; 
+        
+        UIInput ui = (UIInput) fo;
+        if ( ui.isReadonly()) return; 
+        
+        if ( fo instanceof JTextComponent ) {
+            JTextComponent jc = (JTextComponent) fo;
+            if ( jc.isEditable()) { 
+                UIInputUtil.updateBeanValue( ui ); 
+            }
+        }
+        else if (fo instanceof JToggleButton) {
+            UIInputUtil.updateBeanValue( ui ); 
+        }
+        else if (fo instanceof JComboBox) {
+            UIInputUtil.updateBeanValue( ui ); 
+        }
+    }
         
     public Map getInfo() { 
         Map map = new HashMap();
