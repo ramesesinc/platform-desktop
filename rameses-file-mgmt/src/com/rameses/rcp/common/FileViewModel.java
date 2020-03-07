@@ -7,7 +7,7 @@ package com.rameses.rcp.common;
 import com.rameses.filemgmt.FileManager;
 import com.rameses.filemgmt.FileManager.DbProvider;
 import com.rameses.rcp.framework.Binding;
-import java.awt.Dimension;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +26,8 @@ public class FileViewModel {
     private Number cellHeight;
     private Number cellSpacing;
     
+    public final Map eventMap = new HashMap();
+
     public boolean isEditable() { return editable; } 
     public void setEditable( boolean editable ) {
         this.editable = editable; 
@@ -60,15 +62,15 @@ public class FileViewModel {
     public void setCellHeight( Number cellHeight ) {
         this.cellHeight = cellHeight; 
     }
-    
+        
     public List fetchList( Map params ) { 
         return null; 
     } 
     
-    public boolean removeItem( Object item ) {
-        return true; 
+    public Object getSelectedItem() { 
+        return workspace.thumbnail; 
     }
-    
+        
     public void afterAddItem( Object item ) {
     }
     
@@ -77,10 +79,25 @@ public class FileViewModel {
         return ( dbp == null ? null : dbp.read(params)); 
     } 
     
-    public Object openItem( Object item ) {
+    public Object createItem() {
         return null; 
     }
     
+    public Object openItem( Object item ) {
+        return null; 
+    }
+
+    public boolean removeItem( Object item ) {
+        return true; 
+    }
+
+    public void reload() {
+        if ( workspace.albumHandler != null ) {
+            workspace.albumHandler.reload(); 
+        }
+    }
+    
+
     public Binding getBinding() {
         return (provider == null ? null : provider.getBinding()); 
     }
@@ -92,10 +109,7 @@ public class FileViewModel {
         provider.addItem( item ); 
     }
     
-    public Object getSelectedItem() { 
-        return (provider == null ? null : provider.getSelectedItem()); 
-    }
-    
+
     private Provider provider; 
     public void setProvider( Provider provider ) { 
         this.provider = provider; 
@@ -103,24 +117,38 @@ public class FileViewModel {
     public static interface Provider { 
         Binding getBinding(); 
         Binding getInnerBinding(); 
-        void addItem( Object item ) throws Exception;
-        
-        Object getSelectedItem();
+        void addItem( Object item ) throws Exception;        
         void updateBeanValue();
     }  
+
     
+    public final boolean fireRemoveItem( Object item ) { 
+        boolean b = removeItem( item ); 
+        if ( !b ) return false; 
+        
+        DbProvider dbp = FileManager.getInstance().getDbProvider(); 
+        if ( dbp != null ) dbp.remove((Map) item); 
+        
+        return true; 
+    }
     
     
     private final Workspace workspace = new Workspace(); 
     public Workspace getWorkspace() { return workspace; } 
     
     public class Workspace { 
-        
-        private Object selectedThumbnail; 
-        
-        public void setSelectedThumbnail( Object selectedThumbnail ) {
-            this.selectedThumbnail = selectedThumbnail; 
-            if ( provider != null ) provider.updateBeanValue();
+        private Object thumbnail; 
+
+        public void thumbnailSelectionChanged( Object thumbnail ) {
+            this.thumbnail = thumbnail; 
         } 
+        
+        private ListPaneModel albumHandler;
+        public void setAlbumHandler( Object model ) {
+            albumHandler = null;
+            if ( model instanceof ListPaneModel ) {
+                albumHandler = (ListPaneModel) model; 
+            } 
+        }
     }
 }

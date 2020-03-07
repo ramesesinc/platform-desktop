@@ -224,6 +224,7 @@ public final class FileManager {
         Map create( Map data );
         Map save( Map data ); 
         Map read( Map params ); 
+        Map remove( Map params );
     } 
     
     private class SessionCheckProc implements RunProc { 

@@ -22,4 +22,8 @@ public class FileDbProviderImpl implements FileManager.DbProvider {
         def m = [ objid: params.objid ]; 
         return fileSvc.read( m ); 
     } 
+
+    Map remove( Map params ) { 
+        return fileSvc.remove( params ); 
+    }
 } 

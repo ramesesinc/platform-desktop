@@ -61,7 +61,7 @@ public class FileViewPanel extends XComponentPanel {
     private void initComponents() { 
         setLayout(new MainLayoutManager());  
         setPreferredSize(new Dimension(200, 100)); 
-        setName("fileviewpanel");
+        //setName("fileviewpanel");
         
         modelHandler = new FileViewModelImpl(null); 
         headerPanel = new HeaderPanel();
@@ -98,8 +98,8 @@ public class FileViewPanel extends XComponentPanel {
         blankComp.setText("<html><br/><h3>No available item(s)</h3></html>");
         blankComp.setForeground( Color.decode("#a0a0a0")); 
         blankComp.setVisibleWhen("#{cardName == 'blank'}"); 
-        blankComp.setDepends(new String[] {"selectedItem"});
-        blankComp.setOpaque(true);
+        blankComp.setDepends(new String[] {"selectedItem"}); 
+        blankComp.setOpaque(true); 
         cardpanel.add( blankComp, "blank" ); 
 
         Color borderColor = new Color(150, 150, 150); 
@@ -227,6 +227,7 @@ public class FileViewPanel extends XComponentPanel {
             newhandler = new FileViewModelImpl( null ); 
         } 
         
+        
         Number num = newhandler.getCellSpacing(); 
         if ( num != null ) viewPanel.setCellSpacing( num.intValue() ); 
         
@@ -243,7 +244,11 @@ public class FileViewPanel extends XComponentPanel {
         
         newhandler.setProvider(new FileViewModelProvider()); 
         modelHandler = newhandler; 
-        pr.setProperty(bean, "handlerProxy", modelHandler);        
+        pr.setProperty(bean, "handlerProxy", modelHandler); 
+        pr.setProperty(bean, "name", getName()); 
+        
+        Object albumHandler = pr.getProperty(bean, "listHandler"); 
+        modelHandler.getWorkspace().setAlbumHandler( albumHandler ); 
     } 
 
     public void afterLoad() {
@@ -321,10 +326,6 @@ public class FileViewPanel extends XComponentPanel {
             root.modelHandler.afterAddItem( item ); 
         } 
 
-        public Object getSelectedItem() { 
-            return root.viewPanel.getSelectedItem(); 
-        } 
-        
         public void updateBeanValue() {
             String sname = root.getName(); 
             if ( sname == null || sname.trim().length() == 0 ) {
@@ -335,7 +336,7 @@ public class FileViewPanel extends XComponentPanel {
             Object bean = (binding == null ? null : binding.getBean()); 
             if ( bean == null ) return; 
             
-            Object value = getSelectedItem(); 
+            Object value = null; //getSelectedItem(); 
             UIControlUtil.setBeanValue(bean, sname, value); 
             binding.notifyDepends( sname ); 
         }

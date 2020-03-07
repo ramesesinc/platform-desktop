@@ -10,20 +10,45 @@ class FileViewPanelModel extends ComponentBean {
     @Binding
     def binding;
     
+    String name; 
+    
     def handlerProxy; 
     def cache = [:]; 
     def self = this; 
 
     def selectedItem; 
     
+    void updateNameValue( item ) {
+        if ( name ) { 
+            setValue( name, item ); 
+        }
+    }
+    
     void setSelectedItem( item ) { 
         this.selectedItem = item; 
-        if ( item == null ) return;
+        if ( item == null ) { 
+            updateNameValue( item ); 
+            return; 
+        } 
+        
         if ( item.objid ) {
-            def o = cache.get( item.objid ); 
-            if ( o ) return; 
+            if ( item._cardname != 'view' ) {
+                cache.remove( item.objid.toString() ); 
+            }
 
-            o = handlerProxy.getItem( item ); 
+            def o = cache.get( item.objid ); 
+            if ( o ) {
+                updateNameValue( item ); 
+                return; 
+            }
+
+            try {
+                o = handlerProxy.getItem( item ); 
+            } catch(Throwable t) { 
+                o = null; 
+                MsgBox.err( t ); 
+            } 
+            
             if ( o ) { 
                 o.items?.each{ c-> 
                     c.filetype = o.filetype; 
@@ -34,10 +59,13 @@ class FileViewPanelModel extends ComponentBean {
                 item._cardname = 'blank';
                 cache.remove( item.objid ); 
             } 
-        } else {
+        } 
+        else {
             item._cardname = 'blank';
             cache.remove( item.objid ); 
         }
+        
+        updateNameValue( item ); 
     } 
     
     boolean isAllowAddPermitted() {
@@ -108,7 +136,7 @@ class FileViewPanelModel extends ComponentBean {
     void setSelectedThumbnail( value ) {
         this.selectedThumbnail = value; 
         if ( handlerProxy instanceof FileViewModel ) { 
-            handlerProxy.workspace.setSelectedThumbnail( value ); 
+            handlerProxy.workspace.thumbnailSelectionChanged( value ); 
         } 
     } 
     
@@ -131,24 +159,35 @@ class FileViewPanelModel extends ComponentBean {
                 return null; 
             } 
             
-            return Inv.lookupOpener('sys_fileitem:open', [ fileitem: o ]); 
+            if ( handlerProxy.eventMap.onchangeItem ) { 
+                handlerProxy.eventMap.onchangeItem( o ); 
+                return null; 
+            } 
+            return Inv.lookupOpener('sys_fileitem:open', [ fileitem: o, eventMap: handlerProxy.eventMap ]); 
         }
     ] as ThumbnailViewModel;     
     
     
     def addFile() {
         def params = [:]; 
+        def item = handlerProxy.createItem();
+        if ( item instanceof Map ) {
+            params.putAll( item ); 
+        }
+        
         params.handler = { o-> 
             o.remove('items'); 
             handlerProxy.addItem([ objid: o.objid, title: o.title ]); 
         } 
-        return Inv.lookupOpener('sys_file:create', params );        
+        return Inv.lookupOpener('sys_file:create', params ); 
     }
     
     def removeFile() { 
         if ( !selectedItem ) return null; 
         if ( MsgBox.confirm('You are about to remove the selected item. Proceed?')) {
-            listHandler.removeSelectedItem(); 
+            boolean pass = handlerProxy.fireRemoveItem( selectedItem ); 
+            if ( pass ) listHandler.removeSelectedItem(); 
+            
         } else { 
             return null; 
         }

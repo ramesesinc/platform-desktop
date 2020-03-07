@@ -10,14 +10,21 @@ public class FileItemOpenModel  {
     @Binding 
     def binding;
 
+    @FormId
+    def formId = new java.rmi.server.UID().toString();
+    
     @FormTitle
     def formTitle;
+    
+    @SubWindow
+    def window;
     
     private boolean cancelled;
     
     def image; 
     def loadingStatusMessage;
     
+    Map eventMap;        
     def fileitem; 
     def filehandler = [
         onTransfer: { fileid, filesize, bytesprocessed-> 
@@ -36,11 +43,16 @@ public class FileItemOpenModel  {
     ] as com.rameses.filemgmt.DefaultFileDownloadHandler;
 
     def fileloctype;
+    def images = [:];
     
     def init() { 
+        if ( eventMap != null ) { 
+            // hook call back events
+            eventMap.onchangeItem = onchangeItemHandler;
+        }
+        
         loadingStatusMessage = 'Processing...';
         formTitle = 'Form Item Viewer ('+ fileitem.objid +')'; 
-        println 'fileitem -> '+ fileitem;
         
         fileloctype = fileitem.fileloc.loctype;
         if ( fileloctype == 'file' ) {
@@ -63,9 +75,28 @@ public class FileItemOpenModel  {
         return null; 
     } 
     
+    def onchangeItemHandler = { o-> 
+        if ( o == null ) {
+            return;
+        }
+                
+        fileitem = o; 
+        formTitle = 'Form Item Viewer ('+ fileitem.objid +')'; 
+        window.update([ title: formTitle ]);
+        
+        loadingStatusMessage = 'Processing...';
+        binding.fireNavigation("default"); 
+        
+        def pgname = init(); 
+        if ( !pgname ) pgname = "default"; 
+        binding.fireNavigation( pgname ); 
+        return null; 
+    }
+    
     @Close 
     void closeForm() { 
         cancelled = true; 
+        eventMap.onchangeItem = null;
         
         if ( fileloctype == 'file' ) {
             return ; 
@@ -82,20 +113,31 @@ public class FileItemOpenModel  {
             loadImageFromFileLoc(); 
         }
         else { 
-            def fdm = com.rameses.filemgmt.FileDownloadManager.instance; 
-            def file = fdm.getContentFile( fileitem.objid ); 
-            image = new javax.swing.ImageIcon( file.toURI().toURL()); 
+            def imageURL = images.get( fileitem.objid );
+            if ( imageURL == null ) { 
+                def fdm = com.rameses.filemgmt.FileDownloadManager.instance; 
+                def file = fdm.getContentFile( fileitem.objid ); 
+                imageURL = file.toURI().toURL();
+            } 
+            image = new javax.swing.ImageIcon( imageURL ); 
+            images.put( fileitem.objid, imageURL ); 
         } 
     }
     
     void loadImageFromFileLoc() {
-        def conf = fileitem.fileloc; 
-        def url = new URL( conf.url ); 
-        def dir = new java.io.File( url.toURI()); 
-        if ( conf.rootdir ) dir = new java.io.File( dir, conf.rootdir ); 
+        def imageURL = images.get( fileitem.objid );
+        if ( imageURL == null ) { 
+            def conf = fileitem.fileloc; 
+            def url = new URL( conf.url ); 
+            def dir = new java.io.File( url.toURI()); 
+            if ( conf.rootdir ) dir = new java.io.File( dir, conf.rootdir ); 
+
+            def fname = fileitem.objid.toString() +'.'+ fileitem.filetype; 
+            def file = new File( dir, fname ); 
+            imageURL = file.toURI().toURL();
+        }
         
-        def fname = fileitem.objid.toString() +'.'+ fileitem.filetype; 
-        def file = new File( dir, fname ); 
-        image = new javax.swing.ImageIcon( file.toURI().toURL()); 
+        image = new javax.swing.ImageIcon( imageURL ); 
+        images.put( fileitem.objid, imageURL ); 
     }
 }
