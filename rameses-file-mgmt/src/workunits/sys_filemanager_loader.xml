@@ -1,6 +1,0 @@
-<workunit>
-    <invokers>
-        <invoker type="loader" action="doStart" target="process"/>
-    </invokers>
-    <code class="com.rameses.filemgmt.models.FileManagerLoader" /> 
-</workunit>
