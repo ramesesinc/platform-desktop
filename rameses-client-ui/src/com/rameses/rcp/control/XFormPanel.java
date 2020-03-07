@@ -380,7 +380,7 @@ public class XFormPanel extends JPanel implements FormPanelProperty, UIComposite
             } 
         } catch(Throwable t) {;}         
         
-        invalidate(); 
+        revalidate();
         repaint();
     }
     
