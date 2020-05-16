@@ -578,6 +578,10 @@ public abstract class AbstractListDataProvider
     public boolean isColumnEditable(Object item, String columnName) { 
         return false;
     } 
+    
+    public Object onInvokeAction(Object item, String columnName, Map props) {
+        return null; 
+    } 
         
     // <editor-fold defaultstate="collapsed" desc=" ListItem helper methods "> 
     

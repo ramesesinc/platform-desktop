@@ -68,8 +68,7 @@ public class Column implements Serializable
     private Object action;
     
     private boolean dynamic;
-    
-    
+
     private Map properties = new HashMap();
     
     public Column() {
@@ -379,7 +378,7 @@ public class Column implements Serializable
     public void setDynamic(boolean dynamic) {
         this.dynamic = dynamic;
     }
-       
+           
     // </editor-fold>
     
     public final Column set(String name, Object value) {
@@ -408,6 +407,18 @@ public class Column implements Serializable
             Object otextcase = data.get("textcase"); 
             setTextCase(otextcase == null? null: otextcase.toString());
         } catch(Throwable t){;} 
+        
+        if ( "button".equals(type)) {
+            ButtonColumnHandler h = new ButtonColumnHandler(); 
+            h.setVisibleWhen( getPropertyString("visibleWhen")); 
+            h.setTag( getPropertyString("tag")); 
+            
+            Object aa = getPropertyString("action");
+            if ( aa == null ) aa = this.action; 
+            h.setAction( aa == null ? null : aa.toString() );
+            
+            setTypeHandler( h ); 
+        }
     }
     
     private void init(Object[] dataArray) {
@@ -422,6 +433,10 @@ public class Column implements Serializable
         }
     }
     
+    private String getPropertyString( String name ) {
+        Object value = getProperties().get( name ); 
+        return (value == null ? null : value.toString()); 
+    }
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc=" TypeHandler (class) ">

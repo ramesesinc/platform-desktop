@@ -18,7 +18,6 @@ import com.rameses.rcp.common.ComboBoxColumnHandler;
 import com.rameses.rcp.common.DateColumnHandler;
 import com.rameses.rcp.common.DecimalColumnHandler;
 import com.rameses.rcp.common.EditorListSupport;
-import com.rameses.rcp.common.IconColumnHandler;
 import com.rameses.rcp.common.IntegerColumnHandler;
 import com.rameses.rcp.common.LabelColumnHandler;
 import com.rameses.rcp.common.ListItem;
@@ -819,11 +818,7 @@ public class CellRenderers {
         } 
         
         public void invokeAction() throws Exception { 
-            Column oColumn = getContext().getColumn(); 
-            String name = oColumn.getName(); 
-            if ( name != null && name.trim().length() > 0 ) { 
-                getContext().getTableControl().invokeAction( name, new Object[]{} ); 
-            } 
+            //do nothing, implementation has been transferred to a generic routine
         } 
     } 
     

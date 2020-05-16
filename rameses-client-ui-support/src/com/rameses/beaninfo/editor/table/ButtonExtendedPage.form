@@ -18,9 +18,23 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-              <Component id="jLabel2" min="-2" pref="78" max="-2" attributes="1"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="txtVisibleWhen" min="-2" pref="297" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Component id="jLabel4" min="-2" pref="78" max="-2" attributes="1"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="txtTag" min="-2" pref="297" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Component id="jLabel3" min="-2" pref="78" max="-2" attributes="1"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="txtAction" min="-2" pref="297" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Component id="jLabel2" min="-2" pref="78" max="-2" attributes="1"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="txtVisibleWhen" min="-2" pref="297" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
               <EmptySpace pref="44" max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -33,7 +47,17 @@
                   <Component id="jLabel2" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
                   <Component id="txtVisibleWhen" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="23" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel3" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
+                  <Component id="txtAction" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel4" min="-2" pref="20" max="-2" attributes="0"/>
+                  <Component id="txtTag" alignment="0" min="-2" pref="20" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace pref="21" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -47,6 +71,26 @@
     <Component class="com.rameses.rcp.swingx.TextField" name="txtVisibleWhen">
       <Properties>
         <Property name="name" type="java.lang.String" value="visibleWhen" noResource="true"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Action :"/>
+      </Properties>
+    </Component>
+    <Component class="com.rameses.rcp.swingx.TextField" name="txtAction">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="action" noResource="true"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Tag :"/>
+      </Properties>
+    </Component>
+    <Component class="com.rameses.rcp.swingx.TextField" name="txtTag">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="tag" noResource="true"/>
       </Properties>
     </Component>
   </SubComponents>

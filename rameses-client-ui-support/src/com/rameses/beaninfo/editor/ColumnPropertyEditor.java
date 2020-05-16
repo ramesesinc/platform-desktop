@@ -209,7 +209,9 @@ public class ColumnPropertyEditor implements PropertyEditor
         } else if ( typeHandler instanceof ButtonColumnHandler ) { 
             ButtonColumnHandler handler = (ButtonColumnHandler) typeHandler;
             sb.append("new " + handler.getClass().getName() + "(");
-            sb.append(convertString(handler.getVisibleWhen())); 
+            sb.append(convertString(handler.getVisibleWhen())).append(", "); 
+            sb.append(convertString(handler.getAction())).append(", "); 
+            sb.append(convertString(handler.getTag())); 
             sb.append(")");
         } else if ( typeHandler instanceof IconColumnHandler ) { 
             IconColumnHandler lch = (IconColumnHandler) typeHandler;

@@ -11,6 +11,7 @@ import com.rameses.common.MethodResolver;
 import com.rameses.rcp.common.AbstractListDataProvider;
 import com.rameses.rcp.common.AbstractListModel;
 import com.rameses.rcp.common.Action;
+import com.rameses.rcp.common.ButtonColumnHandler;
 import com.rameses.rcp.common.CheckBoxColumnHandler;
 import com.rameses.rcp.common.Column;
 import com.rameses.rcp.common.EditorListSupport;
@@ -559,19 +560,23 @@ public class DataTableComponent extends JTable implements TableControl
         // do not do anything if there is an active process running
         if (processingRequest) return;
         
-        if ( me.getID()==MouseEvent.MOUSE_CLICKED ) { 
+        if ( me.getID() == MouseEvent.MOUSE_CLICKED ) { 
             if ( me.getClickCount()==1 ) { 
                 int colIndex = getSelectedColumn(); 
                 if ( colIndex >= 0 && colIndex < getColumnCount() ) {
                     TableCellRenderer renderer = getColumnModel().getColumn(colIndex).getCellRenderer(); 
                     if ( renderer instanceof ActionColumnHandler ) {
                         ActionColumnHandler ach = (ActionColumnHandler) renderer; 
-                        EventQueue.invokeLater(new ActionColumnInvoker( ach )); 
-                        me.consume();
+                        Column colObj = getDataTableModel().getColumn( colIndex ); 
+                        Object rowObj = getDataTableModel().getItem(getSelectedRow()); 
+                        ActionColumnInvoker aci = new ActionColumnInvoker( ach, colObj, rowObj );
+                        EventQueue.invokeLater( aci ); 
+                        me.consume(); 
                         return; 
                     } 
                 }
-            } else if ( me.getClickCount()==2 ) { 
+            } 
+            else if ( me.getClickCount()==2 ) { 
                 Point p = new Point(me.getX(), me.getY()); 
                 int colIndex = columnAtPoint(p); 
                 Column dc = tableModel.getColumn(colIndex); 
@@ -621,7 +626,9 @@ public class DataTableComponent extends JTable implements TableControl
         if ( renderer instanceof ActionColumnHandler ) {
             if ( isSpaceBarKey(e) ) { 
                 ActionColumnHandler ach = (ActionColumnHandler) renderer; 
-                EventQueue.invokeLater(new ActionColumnInvoker( ach )); 
+                Column colObj = getDataTableModel().getColumn(colIndex); 
+                Object rowObj = getDataTableModel().getItem(rowIndex); 
+                EventQueue.invokeLater(new ActionColumnInvoker( ach, colObj, rowObj )); 
             } 
             return false; 
         } 
@@ -2129,20 +2136,41 @@ public class DataTableComponent extends JTable implements TableControl
     
     private class ActionColumnInvoker implements Runnable {
         
-        private ActionColumnHandler handler; 
+        DataTableComponent root = DataTableComponent.this;
         
-        ActionColumnInvoker( ActionColumnHandler handler ) {
+        private ActionColumnHandler handler; 
+        private Column colObj;
+        private Object rowObj;
+        
+        ActionColumnInvoker( ActionColumnHandler handler, Column colObj, Object rowObj ) {
             this.handler = handler; 
+            this.colObj = colObj;
+            this.rowObj = rowObj;
         }
         
         public void run() { 
             try {
-                if ( handler != null ) {
-                    handler.invokeAction(); 
+                if ( handler == null ) { return; }
+                
+                String name = colObj.getName(); 
+                if ( name != null && name.trim().length() > 0 ) { 
+                    root.invokeAction( name, new Object[]{} ); 
                 } 
-            } catch(Exception e) {
+                else {
+                    Object typehandler = colObj.getTypeHandler(); 
+                    if ( typehandler instanceof ButtonColumnHandler ) {
+                        ButtonColumnHandler bch = (ButtonColumnHandler) typehandler;
+                        Map mm = new HashMap();
+                        mm.put("action", bch.getAction()); 
+                        mm.put("tag", bch.getTag()); 
+                        root.getDataProvider().onInvokeAction(rowObj, name, mm);
+                    }
+                }                
+            } 
+            catch(Exception e) {
                 MsgBox.err( e );
-            } catch(Throwable t) {
+            } 
+            catch(Throwable t) {
                 MsgBox.err(new Exception(t.getMessage(), t), t.getMessage()); 
             } 
         } 
