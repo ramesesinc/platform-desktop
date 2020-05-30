@@ -5,6 +5,7 @@
 package com.rameses.rcp.control;
 
 import com.rameses.common.MethodResolver;
+import com.rameses.rcp.common.ClickActionEvent;
 import com.rameses.rcp.common.HtmlViewModel;
 import com.rameses.rcp.common.MsgBox;
 import com.rameses.rcp.common.Opener;
@@ -276,6 +277,12 @@ public class XWebView extends WebViewPane implements UIControl {
             getBinding().fireNavigation( op ); 
         } 
     }    
+    
+    protected void processAction( ClickActionEvent cae ) {
+        if ( docModel != null ) {
+            docModel.onClick( cae ); 
+        }
+    } 
 
     protected void onSucceeded(WebEngine we) { 
         if ( docModel == null ) return; 

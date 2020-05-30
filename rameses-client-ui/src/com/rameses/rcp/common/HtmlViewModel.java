@@ -32,6 +32,9 @@ public class HtmlViewModel extends DocViewModel {
     public void onCompleted() {
     }
     
+    public void onClick( Object e ) {
+    }
+    
     // <editor-fold defaultstate="collapsed" desc=" ViewProvider interface "> 
     
     public static interface ViewProvider extends DocViewModel.Provider {

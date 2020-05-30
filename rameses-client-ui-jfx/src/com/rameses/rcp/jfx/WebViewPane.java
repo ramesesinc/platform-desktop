@@ -5,6 +5,7 @@
 package com.rameses.rcp.jfx;
 
 
+import com.rameses.rcp.common.ClickActionEvent;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -88,6 +89,9 @@ public class WebViewPane extends JPanel {
     } 
     
     protected void processAction( String name, Map param ) {
+    }
+    
+    protected void processAction( ClickActionEvent cae ) {
     }
     
     protected void onSucceeded( WebEngine we ) {
@@ -297,10 +301,14 @@ public class WebViewPane extends JPanel {
                 if (!(node instanceof EventTarget)) continue;
                 
                 Element elem = (Element) node; 
+                String tagName = node.getNodeName(); 
+                String href = null; 
                 String actionName = null;
                 String stype = elem.getAttribute("type")+""; 
                 if ( "A".equalsIgnoreCase( node.getNodeName()) ) {
                     actionName = elem.getAttribute("action");
+                    href = elem.getAttribute("href"); 
+                    href = (href == null ? null : href.trim()); 
                 }
                 else if ( "BUTTON".equalsIgnoreCase( node.getNodeName())) {
                     actionName = elem.getAttribute("action");
@@ -313,8 +321,14 @@ public class WebViewPane extends JPanel {
                     EventTarget et = (EventTarget) node; 
                     et.addEventListener("click", new LinkActionHandler(), false);
                 }
+                else if ( href != null && href.length() > 1) {
+                    ClickActionHandler cah = new ClickActionHandler(); 
+                    cah.tagName = tagName; 
+                    
+                    EventTarget et = (EventTarget) node; 
+                    et.addEventListener("click", cah, false);
+                }
             }
-            
         }
     }
  
@@ -350,4 +364,78 @@ public class WebViewPane extends JPanel {
             } 
         }
     } 
+    
+    private class ClickActionHandler implements EventListener {
+        
+        private String tagName;
+        
+        public void handleEvent(Event e) {
+            String domEventType = e.getType();
+            if ( "click".equals(domEventType)) {
+                if ( e.getTarget() instanceof Node ) {
+                    Node node = (Node) e.getCurrentTarget();
+                    NamedNodeMap attrs = node.getAttributes(); 
+                    HashMap param = new HashMap();
+                    for (int i=0; i<attrs.getLength(); i++) { 
+                        node = attrs.item(i); 
+                        param.put(node.getNodeName(), node.getNodeValue()); 
+                    }
+
+                    URL url = buildLocationURL(); 
+                    Object ohref = param.get("href"); 
+                    String shref = (ohref == null ? "" : ohref.toString()); 
+                    
+                    StringBuilder sb = new StringBuilder(); 
+                    if ( url == null ) {
+                        sb.append( shref ); 
+                    }
+                    else {
+                        sb.append( url.getProtocol()).append("://"); 
+                        if ( "file".equals(url.getProtocol())) {
+                            sb.append("/"); 
+                        }
+                        sb.append( url.getAuthority()); 
+                        
+                        if ( shref.length() == 0 ) {
+                            //do nothing 
+                        }
+                        else if ( shref.startsWith("/")) {
+                            sb.append( shref ); 
+                        }
+                        else {
+                            sb.append( url.getPath()); 
+                            if ( sb.charAt( sb.length()-1) != '/' ) {
+                                sb.append("/"); 
+                            }
+                            sb.append( shref ); 
+                        }
+                    }
+
+                    ClickActionEvent cae = new ClickActionEvent( tagName, sb.toString(), param ); 
+                    try {
+                        processAction( cae ); 
+                    } 
+                    catch(Throwable t) { 
+                        t.printStackTrace();  
+                    } 
+                    finally {
+                        if (cae.isConsumed()) {
+                            e.stopPropagation(); 
+                            e.preventDefault();
+                        }
+                    }
+                } 
+            } 
+        }
+        
+        private URL buildLocationURL() {
+            try {
+                return new URL( wv.getEngine().getLocation());
+            }
+            catch(Throwable t) {
+                t.printStackTrace(); 
+                return null; 
+            }
+        }
+    }
 }
