@@ -3,6 +3,7 @@
 .osiris_pid
 .shutdown_pid
 .terminal
+.identity
 build-impl.xml~
 Thumbs.db
 *.lnk
