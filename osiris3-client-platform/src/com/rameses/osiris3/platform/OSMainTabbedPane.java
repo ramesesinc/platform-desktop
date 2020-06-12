@@ -66,6 +66,7 @@ class OSMainTabbedPane extends WindowTabbedPane implements WindowContainer, SubW
         SubWindowImpl subWindow = null;
         if (component instanceof SubWindowImpl) {
             subWindow = (SubWindowImpl) component;
+            subWindow.setListener(new SubWindowHandler()); 
             
             String str = subWindow.getTitle(); 
             if (str != null && str.trim().length() > 0) title = str; 
