@@ -115,7 +115,16 @@ public class HtmlViewPane extends JEditorPane
         if (Beans.isDesignTime()) {
             setPreferredSize(new Dimension(100,50));
         }
+        
+        afterInit(); 
     }
+
+    // <editor-fold defaultstate="collapsed" desc=" event methods "> 
+
+    protected void afterInit() {
+    }
+    
+    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc=" Getters / Setters "> 
     

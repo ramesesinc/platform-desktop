@@ -28,6 +28,7 @@ import com.rameses.rcp.ui.ControlProperty;
 import com.rameses.rcp.ui.UIControl;
 import com.rameses.rcp.util.UICommandUtil;
 import com.rameses.rcp.util.UIControlUtil;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -36,12 +37,16 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.beans.Beans;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JViewport;
 import javax.swing.text.html.HTMLDocument;
 
 /**
@@ -128,23 +133,29 @@ public class XHtmlView extends HtmlViewPane implements UIControl, ActiveControl,
                 setCaretPosition(0); 
             } 
             
-            if (newModel != null) newModel.setProvider(new ViewProviderImpl());                
-            if (docModel != null) docModel.setProvider(null);
+            if (docModel != null) {
+                docModel.setProvider(null);
+            }
             
             docModel = newModel; 
+            if ( docModel != null ) {
+                newModel.setProvider(new ViewProviderImpl());                
+            }
+            
             if (url != null) { 
                 URLWorkerTask uwt = new URLWorkerTask(url);
                 ClientContext.getCurrentContext().getTaskManager().addTask(uwt); 
             }
-        } catch(Throwable t) {
+        } 
+        catch(Throwable t) {
             setText("");
-            if (newModel != null) newModel.setProvider(null); 
+            if (newModel != null) {
+                newModel.setProvider(null);
+            } 
             
             System.out.println("[WARN] refresh failed caused by " + t.getMessage());
             if (ClientContext.getCurrentContext().isDebugMode()) t.printStackTrace(); 
-        } finally {
-            
-        }
+        } 
         
         try { 
             String visibleWhen = getVisibleWhen(); 
@@ -321,6 +332,26 @@ public class XHtmlView extends HtmlViewPane implements UIControl, ActiveControl,
         public Object invokeJS(String text) {
             return null; 
         }
+        
+        public int getWidth() {
+            Container con = root.getParent(); 
+            if ( con instanceof JViewport) {
+                return con.getWidth(); 
+            }
+            else {
+                return root.getWidth();
+            }
+        }
+        
+        public int getHeight() {
+            Container con = root.getParent(); 
+            if ( con instanceof JViewport) {
+                return con.getHeight();
+            }
+            else {
+                return root.getHeight();
+            }
+        }
     }
     
     // </editor-fold> 
@@ -452,4 +483,29 @@ public class XHtmlView extends HtmlViewPane implements UIControl, ActiveControl,
     }
     
     // </editor-fold>        
+    
+    // <editor-fold defaultstate="collapsed" desc=" Event methods "> 
+
+    public void addNotify() {
+        super.addNotify();
+        getParent().addComponentListener(new ComponentAdapterImpl()); 
+    }
+        
+    private class ComponentAdapterImpl extends ComponentAdapter {
+        
+        XHtmlView root = XHtmlView.this;
+        
+        public void componentResized(ComponentEvent ce) {
+            if ( root.docModel != null ) {
+                int w = ce.getComponent().getWidth();
+                int h = ce.getComponent().getHeight(); 
+
+                DocViewModel.ResizeEvent re = new DocViewModel.ResizeEvent( w, h ); 
+                docModel.onresize( re ); 
+            }
+        }
+    }
+    
+    // </editor-fold>
+    
 }

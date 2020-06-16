@@ -468,6 +468,13 @@ public class XFormulaEditor extends JTextPane implements UIInput, ActiveControl,
             }); 
         }
 
+        public int getWidth() {
+            return 0; 
+        }
+        
+        public int getHeight() {
+            return 0;
+        }        
     }
     
     // </editor-fold>    

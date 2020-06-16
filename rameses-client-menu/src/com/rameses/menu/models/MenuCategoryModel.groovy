@@ -22,7 +22,6 @@ class MenuCategoryModel  {
 
     def clientContext = com.rameses.rcp.framework.ClientContext.currentContext;
     def session = OsirisContext.getSession();
-    def menuHtml;
     def invokers = [:];
 
     def fontColor = "black";
@@ -154,67 +153,94 @@ class MenuCategoryModel  {
         model = model.findAll{ it.rowsize > 0 };
         return model;
     }
-    
-    void render(def model) {
-        
-        int width = cellwidth*cols;
-        def sb = new StringBuilder();
-        sb.append("<html>");
-        sb.append("<body>");
-        sb.append( "<table width=${width}>" );
-        model.each { row ->
-            sb.append("<tr>");
-            
-            int height = 100 + (row.rowsize * 20);
-            
-            //display each category
-            row.list.each { m->
-               sb.append("<td width=${cellwidth}>");
-               
-                    //value of one cell here
-                    sb.append("<table cellpadding=0 height=${height} width=${cellwidth}>");
-                        sb.append("<tr>");
-                            sb.append("<td valign=top style=\"padding-left:20px;\" height=${height} width=${iconwidth}>");
-                                sb.append( "<image src=\"classpath://${m.icon}\" />");
-                            sb.append("</td>");
-                            sb.append("<td valign=top  style=\"padding-left:10px;;\" height=${height}>");
-                                sb.append("<b><font size=${fontSize} face=\"${fontFace}\" color=\"${fontColor}\">${m.caption}</font></b><br>");
-                                sb.append("<table cellpadding=0 cellspacing=2  border=0>"); 
-                                m.subitems.each { sf->
-                                    sb.append("<tr><td>")
-                                    sb.append("<a href=\"openItem\" id=\"${sf.id}\"><font size=${fontSize-1} face=\"${fontFace}\">${sf.caption}</font></a>" );
-                                    //sb.append("&nbsp;<font size=${fontSize-1} face=\"${fontFace}\" color=\"red\">(0)</font>" );
-                                    sb.append("</td></tr>")
-                                } 
-                                sb.append("</table>"); 
-                            sb.append("</td>");
-                        sb.append("</tr>");
-                    sb.append("</table>");
-                
-                sb.append("</td>");
-            }
-            
-            sb.append("</tr>");
-        }
+
+
+    def buildBlock( m ) {
+        def sb = new StringBuilder(); 
+        sb.append('<table border="0" cellpadding="0" width="'+ cellwidth +'">'); 
+        sb.append('<tr>');
+            sb.append('<td valign=top style="padding-left:20px;" width="'+ iconwidth +'">');
+                sb.append('<image src="classpath://'+ m.icon +'"/>');
+            sb.append('</td>');
+            sb.append('<td valign="top" style="padding-left:10px;">');
+                sb.append('<b><font size="'+ fontSize +'" face="'+ fontFace +'" color="'+ fontColor +'">'+ m.caption +'</font></b><br>');
+                sb.append("<table cellpadding=0 cellspacing=2  border=0>"); 
+                m.subitems.each { sf->
+                    sb.append('<tr><td>');
+                    sb.append('<a href="openItem" id="'+ sf.id +'"><font size="'+ (fontSize-1) +'" face="'+ fontFace +'">'+ sf.caption +'</font></a>');
+                    sb.append("</td></tr>")
+                } 
+                sb.append('</table>'); 
+            sb.append('</td>');
+        sb.append('</tr>');
         sb.append("</table>");
-        sb.append("</body>");
-        sb.append("</html>");
-        menuHtml = [
-            getStyles: {
-                def arr = [];
-                arr << "a { color: #3B5998; text-decoration: none }";
-                arr << "a:hover { color: blue; text-decoration: underline }";
-                return  arr.join(" ");
-            },
-            getValue : {
-                return sb.toString();
-            }
-        ] as HtmlViewModel;
+        return sb.toString();
     }
     
+    def render( blocks ) {
+        def cols = 2; 
+        def compWidth = menuHtml.width; 
+        if ( compWidth > 0 ) {
+            def dres = (compWidth.doubleValue() / cellwidth.doubleValue()); 
+            def newcols = dres.intValue(); 
+            if ( newcols == 0 ) {
+                newcols = 1;
+            }
+            cols = newcols; 
+        }
+
+        // /
+
+        def sb = new StringBuilder();
+        sb.append('<html>');
+        sb.append('<body style="padding-top:5px;">');
+        sb.append('<table cellpadding="0" cellspacing="0" border="0">'); 
+        blocks.eachWithIndex{ o,idx->  
+            if ((idx % cols) == 0 ) {
+                sb.append('<tr>'); 
+            }
+            
+            sb.append('<td valign="top" style="padding-top:10px; padding-bottom:10px;">');
+            sb.append( o );
+            sb.append('</td>'); 
+            
+            if ((idx+1 % cols) == 0 ) {
+                sb.append('</tr>'); 
+            }
+        }
+        sb.append('</table>'); 
+        sb.append('</body>');
+        sb.append('</html>');
+        return sb.toString();
+    }
+    
+    def menuHtml = [
+        getStyles: {
+            def arr = [];
+            arr << "a { color: #3B5998; text-decoration: none }";
+            arr << "a:hover { color: blue; text-decoration: underline }";
+            return  arr.join(" ");
+        },
+        getValue : {
+            return render( blocks ); 
+        },
+        onresize: { o-> 
+            menuHtml.refresh(); 
+        }
+    ] as HtmlViewModel;
+            
+    
+    def blocks = []; 
+                                            
     void init() {
         def model = buildModel();
-        render( model );
+        
+        blocks.clear(); 
+        model.each{ row-> 
+            row.list.each{ m-> 
+                blocks << buildBlock( m ); 
+            }
+        }
     }
     
 

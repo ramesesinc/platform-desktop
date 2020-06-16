@@ -68,6 +68,15 @@ public class DocViewModel {
         return false; 
     }
     
+    public int getWidth() {
+        return (provider == null ? 0 : provider.getWidth()); 
+    }
+
+    public int getHeight() {
+        return (provider == null ? 0 : provider.getHeight()); 
+    }
+    
+    
     // <editor-fold defaultstate="collapsed" desc=" Provider interface ">
     
     public static interface Provider 
@@ -81,7 +90,28 @@ public class DocViewModel {
         void load();
         void refresh();
         void requestFocus(); 
+        
+        int getWidth();
+        int getHeight();
     } 
     
     // </editor-fold>
+    
+    
+    public void onresize( ResizeEvent re ) {
+    }
+
+    public static class ResizeEvent {
+        
+        private int width;
+        private int height;
+        
+        public ResizeEvent(int width, int height) {
+            this.width = width;
+            this.height = height; 
+        }
+        
+        public int getWidth() { return width; } 
+        public int getHeight() { return height; } 
+    }
 }

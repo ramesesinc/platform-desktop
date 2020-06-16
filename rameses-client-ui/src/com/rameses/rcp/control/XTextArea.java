@@ -668,6 +668,14 @@ public class XTextArea extends JTextArea implements UIInput, Validatable,
                 }
             }); 
         }
+        
+        public int getWidth() {
+            return 0; 
+        }
+        
+        public int getHeight() {
+            return 0;
+        }        
     }
     
     // </editor-fold>

@@ -241,6 +241,14 @@ public class XWebView extends WebViewPane implements UIControl {
         
         public void requestFocus() { 
         } 
+        
+        public int getWidth() {
+            return 0; 
+        }
+        
+        public int getHeight() {
+            return 0;
+        }
     }
     
     private class WebViewModelImpl extends HtmlViewModel {
