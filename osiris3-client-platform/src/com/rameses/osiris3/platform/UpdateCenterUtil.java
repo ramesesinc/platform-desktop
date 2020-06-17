@@ -67,8 +67,10 @@ final class UpdateCenterUtil
             URL u = new URL(appurl);
             uc = u.openConnection();
             lastModified = uc.getLastModified();
-            if(lastModified==0 && !f.exists())
-                throw new Exception("System failed to find modules. Please check the connection to the download host");
+            
+//            if(lastModified==0 && !f.exists())
+//                throw new Exception("System failed to find modules. Please check the connection to the download host");
+
             is = u.openStream();
             fos = new FileOutputStream(f);
             
@@ -91,9 +93,11 @@ final class UpdateCenterUtil
                 }
                 fos.flush();
             }
-        } catch(Exception e) {
+        } 
+        catch(Exception e) {
             throw e;
-        } finally {
+        } 
+        finally {
             try { is.close(); } catch(Exception ign){;}
             try { oos.close(); } catch(Exception ign){;}
             try { fos.close(); } catch(Exception ign){;}
