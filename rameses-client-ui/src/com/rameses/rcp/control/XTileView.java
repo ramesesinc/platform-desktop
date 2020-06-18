@@ -41,8 +41,9 @@ import javax.swing.ImageIcon;
  *
  * @author wflores
  */
-public class XTileView extends TilePanel implements UIControl, ActiveControl, MouseEventSupport.ComponentInfo  
-{
+public class XTileView extends TilePanel 
+    implements UIControl, ActiveControl, MouseEventSupport.ComponentInfo {
+    
     private TileViewModel model;
     private List<TileViewItem> tiles;
     
@@ -197,17 +198,17 @@ public class XTileView extends TilePanel implements UIControl, ActiveControl, Mo
     
     private void buildItems() {
         removeAll();
-        
-        TileViewModel model = null; 
+                
         Object value = null;
         try {
             value = UIControlUtil.getBeanValue(this);
-        } catch(Exception e) {;}
+        } catch(Throwable e) {;}
         
+        TileViewModel newmodel = null; 
         if (value == null) {
-            model = new TileViewModelImpl();
+            newmodel = new TileViewModelImpl();
         } else if (value instanceof TileViewModel) {     
-            model = (TileViewModel) value;
+            newmodel = (TileViewModel) value;
         } else { 
             List items = new ArrayList();
             if (value.getClass().isArray()) { 
@@ -217,10 +218,17 @@ public class XTileView extends TilePanel implements UIControl, ActiveControl, Mo
             } else if (value instanceof Collection) {
                 items.addAll((Collection) value);
             } 
-            model = new TileViewModelImpl(items); 
+            newmodel = new TileViewModelImpl(items); 
         } 
 
-        this.model = model; 
+        TileViewModel old = this.model; 
+        if ( old != null ) {
+            old.setProvider( null ); 
+        }
+        
+        newmodel.setProvider( new TileViewModelProvider()); 
+        this.model = newmodel; 
+
         tiles = buildTileViews(model); 
     } 
     
@@ -545,6 +553,24 @@ public class XTileView extends TilePanel implements UIControl, ActiveControl, Mo
                 LOCKS.removeElement(item); 
             }
         }
+    }
+    
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc=" TileViewModelProvider ">
+    
+    private class TileViewModelProvider implements TileViewModel.Provider {
+
+        XTileView root = XTileView.this; 
+        
+        public void refresh() {
+            root.refresh();  
+        }
+
+        public void reload() {
+            root.reload(); 
+        }
+        
     }
     
     // </editor-fold>

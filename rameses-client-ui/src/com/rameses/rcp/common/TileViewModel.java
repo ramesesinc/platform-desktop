@@ -34,4 +34,27 @@ public class TileViewModel
     } 
     
     
+    
+    private Provider provider;
+    
+    public void setProvider( Provider provider ) {
+        this.provider = provider; 
+    }
+    
+    public void refresh() {
+        if ( provider != null ) {
+            provider.refresh(); 
+        }
+    }
+    
+    public void reload() {
+        if ( provider != null ) {
+            provider.reload(); 
+        }
+    }
+    
+    public static interface Provider {
+        void refresh();
+        void reload();
+    } 
 }
