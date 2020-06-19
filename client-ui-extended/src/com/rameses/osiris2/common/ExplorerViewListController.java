@@ -64,7 +64,10 @@ public class ExplorerViewListController extends ListController
     
     public String getTitle() {
         Node node = getNode();
-        return (node == null? null: node.getCaption()); 
+        if ( node == null ) return null; 
+        
+        Object val = node.getProperty("title"); 
+        return ( val == null ? node.getCaption() : val.toString()); 
     }
     
     public String getServiceName() {
