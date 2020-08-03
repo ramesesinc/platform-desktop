@@ -2,6 +2,7 @@
 package com.rameses.osiris2.reports;
 
 import com.rameses.common.PropertyResolver;
+import com.rameses.util.QRCodeUtil;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +20,7 @@ public class ReportDataSource implements JRRewindableDataSource {
     private Object source;
     private PropertyResolver propertyResolver;
     private ReportDataSourceHelper helper;
-
+    
     public ReportDataSource(Object source) {    
         setSource( source ); 
         propertyResolver = PropertyResolver.getInstance();
@@ -72,13 +73,24 @@ public class ReportDataSource implements JRRewindableDataSource {
             if ( "_source".equals( fieldName )) {
                 return new ReportDataSource( getSource());
             }
-            
             field = propertyResolver.getProperty(currentObject, fieldName);
             if(field==null) {
                 return null;
             }
             if( field.getClass() == byte[].class ) {
-                return field;
+                return new ByteArrayInputStream( (byte[])field);
+            }
+            else if( field.getClass() == String.class ) {
+                //check if it has qrcode or a base64;
+                String str = (String)field;
+                if( str.startsWith("qrcode:")) {
+                    String newstr = str.substring(7);
+                    Object z =  QRCodeUtil.generateQRCode(newstr);
+                    return new ByteArrayInputStream( QRCodeUtil.generateQRCode(newstr));
+                }
+                else  {
+                    return str;
+                }
             }
             else if( jRField.getValueClass().isAssignableFrom( Collection.class) ) {
                 return new ReportDataSource( field );
