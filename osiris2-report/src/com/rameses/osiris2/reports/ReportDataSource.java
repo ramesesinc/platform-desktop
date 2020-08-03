@@ -2,12 +2,14 @@
 package com.rameses.osiris2.reports;
 
 import com.rameses.common.PropertyResolver;
+import com.rameses.util.Base64Cipher;
 import com.rameses.util.QRCodeUtil;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import javax.swing.JOptionPane;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRRewindableDataSource;
@@ -87,6 +89,13 @@ public class ReportDataSource implements JRRewindableDataSource {
                     String newstr = str.substring(7);
                     Object z =  QRCodeUtil.generateQRCode(newstr);
                     return new ByteArrayInputStream( QRCodeUtil.generateQRCode(newstr));
+                }
+                else if( str.startsWith("image:")) {
+                    String newstr = str.substring(6);
+                    JOptionPane.showMessageDialog( null, "str is " + newstr);
+                    System.out.println( newstr );
+                    Object bytes = (new Base64Cipher()).decode(newstr);
+                    return new ByteArrayInputStream( (byte[]) bytes );
                 }
                 else  {
                     return str;
