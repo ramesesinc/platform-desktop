@@ -101,13 +101,10 @@ public class ReportDataSource implements JRRewindableDataSource {
                     return new ByteArrayInputStream( bytes );
                 }
                 else if ( str.startsWith("image:")) {
-                    String[] arr = str.substring(6).split(",");
-                    String encstr = (arr.length > 1 ? arr[1] : arr[0]); 
-                    String type = (arr.length > 1 ? arr[0] : ""); 
-                    
+                    String encstr = str.substring(6); 
                     Object obj = new Base64Cipher().decode( encstr, false );
                     byte[] bytes = (byte[]) obj;
-                    if ( "url".equalsIgnoreCase( type )) { 
+                    if ( jRField.getValueClass() == java.net.URL.class ) {
                         BytesHandler handler = new BytesHandler( bytes ); 
                         return new URL( null, "bytes:///", handler );
                     } 
