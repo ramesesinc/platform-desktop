@@ -98,7 +98,13 @@ public class ReportDataSource implements JRRewindableDataSource {
                 if ( str.startsWith("qrcode:")) {
                     String newstr = str.substring(7);
                     byte[] bytes =  QRCodeUtil.generateQRCode( newstr );
-                    return new ByteArrayInputStream( bytes );
+                    if ( jRField.getValueClass() == java.net.URL.class ) {
+                        BytesHandler handler = new BytesHandler( bytes ); 
+                        return new URL( null, "bytes:///", handler );
+                    }
+                    else {
+                        return new ByteArrayInputStream( bytes );
+                    }
                 }
                 else if ( str.startsWith("image:")) {
                     String encstr = str.substring(6); 
