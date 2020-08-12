@@ -4,10 +4,7 @@
  */
 package test;
 
-import com.rameses.io.IOStream;
-import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
 import net.sf.json.JSON;
@@ -28,11 +25,10 @@ public class NewEmptyJUnitTest extends TestCase {
     }
 
     public void test1() throws Exception {
-        URL url = getClass().getClassLoader().getResource("test/remittance.json"); 
-        byte[] bytes = IOStream.toByteArray( url ); 
-
-        Object source = new String( bytes, "utf8");
-        source = "{}";
+        //URL url = getClass().getClassLoader().getResource("test/remittance.json"); 
+        //byte[] bytes = IOStream.toByteArray( url ); 
+        //Object source = new String( bytes, "utf8");
+        Object source = "{dtcreated: \"2020-02-01\", sortorder: 1, remitted: true, amount: 100.01}";
         
         JsonConfig jc = new JsonConfig(); 
         jc.registerJsonValueProcessor(java.util.Date.class, new JsonDateValueProcessor()); 
@@ -44,14 +40,15 @@ public class NewEmptyJUnitTest extends TestCase {
 
         Object o = null; 
         if ( js.isArray()) {
-            o = JSONArray.fromObject( js ); 
+            o = JSONArray.fromObject( js, jc ); 
         } else {
-            o =  JSONObject.fromObject( js );
+            o =  JSONObject.fromObject( js, jc );
+            
+            Map map = (Map)o;
+            Object val = map.get("dtcreated");
+            System.out.println("val class -> "+ val.getClass());
         }
         
-        System.out.println("class of o is " + o.getClass());
-        System.out.println("is map -> "+ (o instanceof Map));
-        System.out.println("is list -> "+ (o instanceof List));
         System.out.println( o );
     }
     

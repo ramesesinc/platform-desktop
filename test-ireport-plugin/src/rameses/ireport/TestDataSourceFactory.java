@@ -57,17 +57,17 @@ public class TestDataSourceFactory {
             throw new Exception("File does not exist"); 
         }
                 
-        int read = 0; 
         FileInputStream fis = null;
         StringBuilder buff = new StringBuilder();
         try {
+            int read = 0; 
             byte[] bytes = new byte[1024];
             fis = new FileInputStream( datafile );             
             while ((read = fis.read( bytes )) != -1 ) {
-                buff.append( new String( bytes, 0, read)); 
+                buff.append( new String( bytes, 0, read, "utf-8")); 
             }
-            
-            JOptionPane.showMessageDialog(null, "data is " + buff.toString());
+            System.out.println("json-data: "+ buff.toString());
+            System.out.println("json-data-length: "+ buff.toString().length());
         }
         catch(Exception e) {
             e.printStackTrace();
