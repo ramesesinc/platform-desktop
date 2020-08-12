@@ -1,6 +1,6 @@
 <workunit> 
     <invokers>
-        <invoker type="loader" index="10000" action="init" xasync="true"/>
+        <invoker type="loader" index="10000" action="init"/>
     </invokers>    
     <code class="com.rameses.menu.models.FXHomeMenuModel"/>    
     <pages>
