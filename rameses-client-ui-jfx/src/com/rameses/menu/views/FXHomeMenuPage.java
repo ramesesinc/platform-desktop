@@ -5,11 +5,15 @@
  */
 package com.rameses.menu.views;
 
+import com.rameses.osiris2.themes.FormPage;
+import com.rameses.rcp.common.HtmlViewModel;
+import com.rameses.rcp.ui.annotations.Template;
+
 /**
  *
  * @author elmonazareno
  */
-
+@Template(FormPage.class)
 public class FXHomeMenuPage extends javax.swing.JPanel {
 
     /**

@@ -1,0 +1,14 @@
+<workunit> 
+    <invokers>
+        <invoker type="loader" index="10000" action="init"/>
+        
+        <!-- test -->
+        <invoker type="formActions" caption="Update Status" action="updateStatus"/>
+        <invoker type="formActions" caption="Deduct Status" action="deductStatus"/>
+        <invoker type="formActions" caption="View HTML" action="viewHtml"/>
+    </invokers>    
+    <code class="com.rameses.menu.models.FXHomeMenuModel"/>    
+    <pages>
+        <page template="com.rameses.menu.views.FXHomeMenuPage"/>
+    </pages>
+</workunit>
