@@ -1,6 +1,6 @@
 <workunit> 
     <invokers>
-        <invoker type="loader" index="10000" action="init"/>
+        <invoker xtype="loader" index="10000" action="init"/>
     </invokers>    
     <code class="system.home.HomeControllerImpl"/>    
     <pages>
