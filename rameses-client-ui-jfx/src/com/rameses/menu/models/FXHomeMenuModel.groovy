@@ -5,15 +5,8 @@ import com.rameses.rcp.jfx.WebViewPane
 import com.rameses.rcp.annotations.*;
 import com.rameses.osiris2.client.*;
 import com.rameses.osiris2.common.*;
-
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingQueue
-import javax.swing.JDialog;
-
 import com.rameses.client.notification.socketio.*;
+import com.rameses.osiris2.*;
 
 class FXHomeMenuModel { 
 
@@ -29,9 +22,6 @@ class FXHomeMenuModel {
     @Caller
     def caller;
 
-    @Service("HomeMenuService")
-    def menuService;
-    
     def clientContext = com.rameses.rcp.framework.ClientContext.currentContext;
     def session = OsirisContext.getSession();
     def menuHtml;
@@ -40,11 +30,18 @@ class FXHomeMenuModel {
     def icon;
     def items;
     
-    def notifyHandlers = [];
+    def notifyHandlers = [:];
+    
+    def _menuNotifications = [:];
+    public def getMenuNotificationService(def conn) {
+        if( !_menuNotifications.containsKey(conn) ) {
+            def  svc = InvokerProxy.instance.create("MenuNotificationService", null, conn );
+            _menuNotifications.put( (conn==null)?"default": conn, svc );
+        }
+        return _menuNotifications.get( conn );
+    }
     
     void init() {
-        println "INIT : entering init in model";
-        
         icon = 'classpath://images/logo.png'; 
         def appEnv = clientContext.appEnv; 
         def customfolder = appEnv['app.custom']; 
@@ -66,33 +63,47 @@ class FXHomeMenuModel {
                 }
             } 
         } 
-        
         //this if for items tagged as home.action
-        items.addAll(Inv.lookupActions('home.action'));
-        
+        for( ia in Inv.lookupActions('home.action') ) {
+            if( session.getSecurityProvider().checkPermission( ia.invoker.domain, "*", null  ) == true ) {
+                items.add( ia );
+            }
+        }
         //
         items.each { 
             if (!it.icon) it.icon = homeicon;
             if( it.properties?.notificationid !=null ) {
                 def nid = it.properties?.notificationid;
+                def conn = null;
+                if( it instanceof InvokerAction ) {
+                    conn = it.invoker?.module.name?.trim();
+                }
                 def notifyHandler = [
                     onMessage: { msg ->
-                        println "receive message " +msg;
-                        //menuHtml.getWebEngine().call("updateCount", id, cnt );                         
+                        def svc = getMenuNotificationService( conn );
+                        def cnt = svc.getCount( [notificationid: nid] );
+                        menuHtml.getWebEngine().call("updateCount", nid, cnt.count );                         
                     }
                 ] as DefaultNotificationHandler;
-                notifyHandlers << notifyHandler;
+                notifyHandlers.put( nid, notifyHandler);
             } 
         }     
 
-        def fin = {
-            println "starting notifyhandlers";
-            notifyHandlers.each {
-                println "starting " + it;
-                //it.start();
+        def oneTimeLoad = {
+            notifyHandlers.each { k,v->
+                TaskNotificationClient.getInstance().register(k, v);
+                //fire first so we can update the task count after loading
+                TaskNotificationClient.getInstance().send(k, [:]);
             }
-        }
-        render(items,fin);
+        };
+        render(items, oneTimeLoad);
+    }
+    
+    @Close
+    void onClose() {
+        notifyHandlers.each{k,v-> 
+            TaskNotificationClient.getInstance().unregister( v ); 
+        };    
     }
     
     def openItem( param ) {
@@ -138,7 +149,7 @@ class FXHomeMenuModel {
     } 
     
     //html portions
-    void render( items, onfinish ) {
+    void render( items, def oneTimeLoad ) {
         def buff = new StringBuilder(); 
         items.each { itm ->
             buff.append( """
@@ -147,9 +158,7 @@ class FXHomeMenuModel {
                 <img src=\"classpath://${itm.icon}\" width=\"48\">
                 <label>${itm.caption}</label>""");
             if( itm.properties?.notificationid !=null ) {
-                if(itm.properties?.notificationid ) {
-                    buff.append( """<span class=\"msgcount\" id=\"${itm.properties.notificationid}\"></span>"""  );
-                }
+                buff.append( """<span class=\"msgcount\" id=\"${itm.properties.notificationid}\"></span>"""  );
             }
             buff.append("""
                 </a>
@@ -162,9 +171,11 @@ class FXHomeMenuModel {
                 return _html; 
             },
             onCompleted: {
-                if(onfinish!=null) {
-                    onfinish();
-                    onfinish = null;
+                if(oneTimeLoad !=null) {
+                    //we have to remove and nullify this so it wont be executed again.
+                    //it seems this hloader is cached by the html view model.
+                    oneTimeLoad();
+                    oneTimeLoad = null;
                 }
             }
         ] as HtmlViewModel 
@@ -222,7 +233,7 @@ class FXHomeMenuModel {
             -ms-transform: scale(1.1);
             transform: scale(1.1);
             box-shadow: 0px 5px 9px #C7C7C7;
-            background: #b8daff;;
+            background: #b8daff;
         }
         .menu .msgcount {
             color: red; font-weight: bold;
@@ -230,7 +241,14 @@ class FXHomeMenuModel {
         </style> 
         <script> 
         function updateCount( elemid, value ) {
-            document.getElementById( elemid ).innerHTML = (value==0) ? : " ("+value+")";    
+            if( value != null && value > 0 ) {
+                value = " (" + value + ")"; 
+            }
+            else {
+                value = "";
+            }    
+            var v = document.getElementById( elemid );
+            if( v!=null ) v.innerHTML = value;  
         } 
         </script>
         """; 
@@ -249,11 +267,13 @@ class FXHomeMenuModel {
     void updateStatus() {
         def id = MsgBox.prompt("Enter id");
         if( !id ) return null;
+        TaskNotificationClient.getInstance().send(id, [domain:id]);
     }
 
     void deductStatus() {
         def id = MsgBox.prompt("Enter id");
         if( !id ) return null;
+        
     }
     
     def viewHtml() {
@@ -261,17 +281,3 @@ class FXHomeMenuModel {
         println ""+menuHtml.value;
     }
 } 
-
-/*    
-    public void start() {
-        TaskNotificationClient.getInstance().register(event, notifyHandler );
-    }
-    
-    public void init() {
-        TaskNotificationClient.getInstance().send(event, [:]);
-    }
-    
-    public void stop() {
-        TaskNotificationClient.getInstance().unregister( notifyHandler );
-    }
-*/
