@@ -3,7 +3,6 @@ package com.rameses.osiris2.reports;
 
 import com.rameses.common.PropertyResolver;
 import com.rameses.util.Base64Cipher;
-import com.rameses.util.QRCodeUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
