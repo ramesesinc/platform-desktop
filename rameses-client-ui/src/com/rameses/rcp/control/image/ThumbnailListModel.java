@@ -95,7 +95,7 @@ public class ThumbnailListModel extends AbstractListModel {
         } else if ( value instanceof byte[] ) {
             return new ImageIcon((byte[]) value);
         } else if ( value instanceof String && getBase64Cipher().isEncoded(value.toString()) ) {
-            Object o = getBase64Cipher().decode(value.toString()); 
+            Object o = getBase64Cipher().decode(value.toString(), false); 
             return resolveImage( o ); 
         } else {
             return null; 

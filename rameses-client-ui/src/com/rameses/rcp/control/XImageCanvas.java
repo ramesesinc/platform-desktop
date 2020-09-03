@@ -18,7 +18,9 @@ import com.rameses.rcp.ui.ActiveControl;
 import com.rameses.rcp.ui.ControlProperty;
 import com.rameses.rcp.ui.UIControl;
 import com.rameses.rcp.util.UIControlUtil;
+import com.rameses.util.Base64Cipher;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Insets;
 import java.net.URL;
 import java.util.HashMap;
@@ -56,6 +58,15 @@ public class XImageCanvas extends ImageViewPanel implements UIControl, ActiveCon
         this.visibleWhen = visibleWhen;
     }    
         
+    
+    private Base64Cipher base64;
+    private Base64Cipher getBase64Cipher() {
+        if (base64 == null) {
+            base64 = new Base64Cipher(); 
+        }
+        return base64; 
+    }    
+    
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc=" UIControl implementation ">    
@@ -87,26 +98,14 @@ public class XImageCanvas extends ImageViewPanel implements UIControl, ActiveCon
                 beanValue = UIControlUtil.getBeanValue(getBinding(), name);
             } 
             
-            if (beanValue instanceof byte[]) { 
-                imgobj = new ImageIcon((byte[]) beanValue); 
-            } else if (beanValue instanceof URL) {
-                imgobj = new ImageIcon((URL) beanValue); 
-            } else if (beanValue instanceof ImageIcon) {
-                imgobj = (ImageIcon) beanValue;
-            } else if (beanValue instanceof String) { 
-                String str = beanValue.toString().toLowerCase(); 
-                if (str.matches("[a-zA-Z]{1,}://.*")) { 
-                    imgobj = new ImageIcon(new URL(beanValue.toString())); 
-                } else { 
-                    imgobj = null; 
-                } 
-            } else { 
-                imgobj = null; 
-            }             
-        } catch(Throwable e) { 
+            imgobj = resolveImage( beanValue );       
+        } 
+        catch(Throwable e) { 
             imgobj = null; 
             
-            if (ClientContext.getCurrentContext().isDebugMode()) e.printStackTrace();
+            if (ClientContext.getCurrentContext().isDebugMode()) { 
+                e.printStackTrace();
+            }
         } 
         
         setValue(imgobj); 
@@ -140,6 +139,37 @@ public class XImageCanvas extends ImageViewPanel implements UIControl, ActiveCon
     public void setStretchHeight(int stretchHeight) {
         this.stretchHeight = stretchHeight;
     }    
+    
+    
+    private ImageIcon resolveImage( Object value ) throws Exception {
+        if ( value == null ) {
+            return null;
+        }
+        else if (value instanceof byte[]) { 
+            return new ImageIcon((byte[]) value); 
+        } 
+        else if (value instanceof URL) {
+            return new ImageIcon((URL) value); 
+        } 
+        else if (value instanceof ImageIcon) {
+            return (ImageIcon) value;
+        } 
+        else if ( value instanceof Image ) {
+            return new ImageIcon((Image) value); 
+        } 
+        else if (value instanceof String) { 
+            String str = value.toString().toLowerCase(); 
+            if (str.matches("[a-zA-Z]{1,}://.*")) { 
+                return new ImageIcon(new URL(value.toString())); 
+            } 
+            else if ( getBase64Cipher().isEncoded(value.toString())) {
+                Object o = getBase64Cipher().decode(value.toString(), false); 
+                return resolveImage( o ); 
+            }
+        } 
+        
+        return null; 
+    }
     
     // </editor-fold>
     
