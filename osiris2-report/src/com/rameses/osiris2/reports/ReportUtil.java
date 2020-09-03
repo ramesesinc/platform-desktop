@@ -232,6 +232,46 @@ public final class ReportUtil {
         factory.setDeveloperCustomFolder( folder ); 
     } 
     
+    public static String join( String delim, Object... args ) {
+        if ( args == null ) {
+            return null;
+        } 
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<args.length; i++) {
+            if( args[i] != null ) {
+                if ( sb.length() > 0 ) {
+                    sb.append( delim == null ? "" : delim ); 
+                }
+                sb.append( args[i].toString() ); 
+            }
+        }
+        return sb.toString(); 
+    }
+    
+    public static String capitalize( String value ) {
+        if ( value == null ) {
+            return value; 
+        }
+        
+        char prevchar = ' '; 
+        char[] chars = value.toCharArray(); 
+        for (int i=0; i<chars.length; i++) {
+            char ch = chars[i]; 
+            if ( Character.isLetter( ch )) { 
+                if ( Character.isWhitespace(prevchar)) {
+                    chars[i] = Character.toUpperCase(ch);
+                } else {
+                    chars[i] = Character.toLowerCase(ch);
+                }
+            }
+            prevchar = ch; 
+        }
+        return new String( chars ); 
+    }
+    
+    
+    
     // <editor-fold defaultstate="collapsed" desc=" CacheResourceCleaner ">  
     
     private static class CacheResourceCleaner implements Runnable {

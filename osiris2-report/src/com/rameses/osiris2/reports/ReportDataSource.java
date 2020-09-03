@@ -6,6 +6,7 @@ import com.rameses.util.Base64Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -84,7 +85,13 @@ public class ReportDataSource implements JRRewindableDataSource {
             if ( value == null ) {
                 return null;
             }
-            if (value.getClass() == byte[].class ) {
+
+            Class fieldClass = jRField.getValueClass();
+            
+            if (value.getClass().toString().endsWith(".JSONNull")) {
+                return null; 
+            } 
+            else if (value.getClass() == byte[].class ) {
                 return new ByteArrayInputStream((byte[]) value);
             }
             else if( value.getClass() == String.class ) {
@@ -117,13 +124,22 @@ public class ReportDataSource implements JRRewindableDataSource {
                         return new ByteArrayInputStream( bytes );
                     }
                 }
+                else if ( Number.class.isAssignableFrom( fieldClass )) {
+                    return toNumber(fieldClass, str); 
+                }
+                else if ( fieldClass == Boolean.class ) {
+                    return toBoolean(str); 
+                }
                 else  {
                     return str;
                 }
             }
-            else if( jRField.getValueClass().isAssignableFrom( Collection.class) ) {
+            else if( fieldClass.isAssignableFrom( Collection.class) ) {
                 return new ReportDataSource( value );
             } 
+            else if ( fieldClass == String.class ) {
+                return value.toString(); 
+            }            
             else { 
                 return value;
             }
@@ -191,4 +207,44 @@ public class ReportDataSource implements JRRewindableDataSource {
             return new ByteArrayInputStream( handler.bytes ); 
         }
     }    
+    
+    private Number toNumber( Class fieldClass, Object value ) {
+        try { 
+            if ( value == null ) {
+                return null; 
+            }
+            else if ( value instanceof Number ) {
+                return (Number) value; 
+            }
+            
+            BigDecimal bd = new BigDecimal( value.toString());  
+            if ( fieldClass == Integer.class ) {
+                return bd.intValue(); 
+            }
+            else if ( fieldClass == Double.class ) {
+                return bd.doubleValue(); 
+            }
+            else if ( fieldClass == Float.class ) {
+                return bd.floatValue(); 
+            }
+            else {
+                return bd; 
+            }
+        }
+        catch(Throwable t) { 
+            return null; 
+        }
+    }
+
+    private Boolean toBoolean( Object value ) {
+        try { 
+            if ( value == null ) {
+                return null; 
+            }
+            return value.toString().toLowerCase().matches("true|1"); 
+        }
+        catch(Throwable t) {
+            return null; 
+        }
+    }
 }
