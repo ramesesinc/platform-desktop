@@ -7,12 +7,12 @@ import com.rameses.rcp.ui.ActiveControl;
 import com.rameses.rcp.ui.ControlProperty;
 import com.rameses.rcp.ui.UIControl;
 import com.rameses.rcp.util.UIControlUtil;
+import com.rameses.util.Base64Cipher;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.beans.Beans;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -169,42 +169,20 @@ public class XImageViewer extends JPanel implements UIControl, ActiveControl, Mo
             
             try {
                 value = UIControlUtil.getBeanValue(this);
-            } catch(Exception e) {;}
+            } catch(Throwable t) {;}
             
-            if( value != null ) 
-            {
-                if(value instanceof String) 
-                {
-                    InputStream is = getClass().getClassLoader().getResourceAsStream((String) value);
-                    image = ImageIO.read(is);
-                } 
-                else if(value instanceof byte[]) 
-                {
-                    image = ImageIO.read(new ByteArrayInputStream((byte[])value));
-                } 
-                else if(value instanceof Image) 
-                {
-                    image = (Image) value;
-                } 
-                else if(value instanceof ImageIcon) 
-                {
-                    image = ((ImageIcon)value).getImage();
-                } 
-                else if(value instanceof InputStream) 
-                {
+            if( value != null ) {
+                if ( value instanceof InputStream ) {
                     image = ImageIO.read((InputStream)value);
                 } 
-                else if(value instanceof File) 
-                {
-                    image = new ImageIcon(((File)value).toURL()).getImage();
-                } 
-                else if(value instanceof URL) 
-                {
-                    image = new ImageIcon((URL) value).getImage();
+                else {
+                    ImageIcon ii = resolveImage( value ); 
+                    image = (ii == null ? null : ii.getImage()); 
                 }
             }
-        } catch(Exception ex) {
-            ex.printStackTrace();
+        } 
+        catch(Throwable t) {
+            t.printStackTrace();
         }
         
         return image;
@@ -251,6 +229,54 @@ public class XImageViewer extends JPanel implements UIControl, ActiveControl, Mo
             scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         }
     }
+    
+    private Base64Cipher base64;
+    private Base64Cipher getBase64Cipher() {
+        if (base64 == null) {
+            base64 = new Base64Cipher(); 
+        }
+        return base64; 
+    }    
+    
+    private ImageIcon resolveImage( Object value ) throws Exception {
+        if ( value == null ) {
+            return null;
+        }
+        else if (value instanceof byte[]) { 
+            return new ImageIcon((byte[]) value); 
+        } 
+        else if (value instanceof URL) {
+            return new ImageIcon((URL) value); 
+        } 
+        else if (value instanceof File) {
+            return new ImageIcon( ((File) value).toURI().toURL() ); 
+        } 
+        else if (value instanceof ImageIcon) {
+            return (ImageIcon) value;
+        } 
+        else if ( value instanceof Image ) {
+            return new ImageIcon((Image) value); 
+        } 
+        else if (value instanceof String) { 
+            String str = value.toString().toLowerCase(); 
+            if (str.matches("[a-zA-Z]{1,}://.*")) { 
+                return new ImageIcon(new URL(value.toString())); 
+            } 
+            else if ( getBase64Cipher().isEncoded(value.toString())) {
+                Object o = getBase64Cipher().decode(value.toString(), false); 
+                return resolveImage( o ); 
+            }
+            else {
+                URL url = getClass().getClassLoader().getResource((String) value);
+                if ( url != null ) {
+                    return new ImageIcon( url ); 
+                }
+            }
+        } 
+        
+        return null; 
+    }    
+    
     //</editor-fold>
         
     // <editor-fold defaultstate="collapsed" desc="  Getters/Setters  ">

@@ -17,6 +17,7 @@ import com.rameses.rcp.ui.ActiveControl;
 import com.rameses.rcp.ui.ControlProperty;
 import com.rameses.rcp.ui.UIControl;
 import com.rameses.rcp.util.UIControlUtil;
+import com.rameses.util.Base64Cipher;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
@@ -176,27 +177,16 @@ public class XPhoto extends JLabel implements UIControl, ActiveControl, MouseEve
                 beanValue = UIControlUtil.getBeanValue(getBinding(), name);
             } 
             
-            if (beanValue instanceof byte[]) { 
-                iicon = new ImageIcon((byte[]) beanValue); 
-            } else if (beanValue instanceof URL) {
-                iicon = new ImageIcon((URL) beanValue); 
-            } else if (beanValue instanceof ImageIcon) {
-                iicon = (ImageIcon) beanValue;
-            } else if (beanValue instanceof String) { 
-                String str = beanValue.toString().toLowerCase(); 
-                if (str.matches("[a-zA-Z]{1,}://.*")) { 
-                    iicon = new ImageIcon(new URL(beanValue.toString())); 
-                } else { 
-                    iicon = null; 
-                } 
-            } else { 
-                iicon = null; 
-            }             
-        } catch(Throwable e) { 
+            iicon = resolveImage( beanValue ); 
+        } 
+        catch(Throwable e) { 
             iicon = null; 
             
-            if (ClientContext.getCurrentContext().isDebugMode()) e.printStackTrace();
-        } finally {
+            if (ClientContext.getCurrentContext().isDebugMode()) {
+                e.printStackTrace();
+            }
+        } 
+        finally {
             iiconImage = null; 
         }
         
@@ -398,6 +388,51 @@ public class XPhoto extends JLabel implements UIControl, ActiveControl, MouseEve
             return null; 
         }
     }
+    
+    
+    private Base64Cipher base64;
+    private Base64Cipher getBase64Cipher() {
+        if (base64 == null) {
+            base64 = new Base64Cipher(); 
+        }
+        return base64; 
+    }    
+    
+    private ImageIcon resolveImage( Object value ) throws Exception {
+        if ( value == null ) {
+            return null;
+        }
+        else if (value instanceof byte[]) { 
+            return new ImageIcon((byte[]) value); 
+        } 
+        else if (value instanceof URL) {
+            return new ImageIcon((URL) value); 
+        } 
+        else if (value instanceof ImageIcon) {
+            return (ImageIcon) value;
+        } 
+        else if ( value instanceof Image ) {
+            return new ImageIcon((Image) value); 
+        } 
+        else if (value instanceof String) { 
+            String str = value.toString().toLowerCase(); 
+            if (str.matches("[a-zA-Z]{1,}://.*")) { 
+                return new ImageIcon(new URL(value.toString())); 
+            } 
+            else if ( getBase64Cipher().isEncoded(value.toString())) {
+                Object o = getBase64Cipher().decode(value.toString(), false); 
+                return resolveImage( o ); 
+            }
+            else {
+                URL url = getClass().getClassLoader().getResource((String) value);
+                if ( url != null ) {
+                    return new ImageIcon( url ); 
+                }
+            }
+        } 
+        
+        return null; 
+    }    
         
     // </editor-fold>
     
