@@ -213,6 +213,18 @@ public class XSubFormPanel extends JPanel implements UISubControl, ActiveControl
 
     // <editor-fold defaultstate="collapsed" desc="  helper methods  ">
     protected void buildForm() {
+        try {
+            buildFormImpl(); 
+        } catch(Throwable t) {
+            t.printStackTrace();
+            
+            if ( t instanceof RuntimeException) {
+                throw (RuntimeException) t; 
+            }
+            throw new RuntimeException(t); 
+        }
+    }
+    private void buildFormImpl() {
         Object value = null;
         //this is usually set by XTabbedPane or
         //other controls that used XSubForm internally

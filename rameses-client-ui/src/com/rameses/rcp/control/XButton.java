@@ -310,7 +310,7 @@ public class XButton extends JButton implements UICommand, ActionListener,
             commitFocusOwner(); 
         }
         
-        final Object outcome = UICommandUtil.processAction(this); ;
+        final Object outcome = UICommandUtil.processAction(this); 
         if (outcome instanceof PopupMenuOpener) {
             PopupMenuOpener menu = (PopupMenuOpener) outcome;
             List items = menu.getItems();

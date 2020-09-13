@@ -29,9 +29,10 @@ import javax.swing.JComponent;
  */
 public class UICommandUtil {
     
-    public static Object processAction(UICommand command) 
-    {
-        if ( Beans.isDesignTime() ) return null;
+    public static Object processAction(UICommand command) {
+        if ( Beans.isDesignTime() ) { 
+            return null;
+        }
 
         ClientContext ctx = ClientContext.getCurrentContext();
         UICommandSupport uics = new UICommandSupport();         
@@ -69,21 +70,28 @@ public class UICommandUtil {
                 if ( !action.startsWith("_")) {
                     Object[] actionParams = new Object[]{};
                     Object actionInvoker = btn.getClientProperty("Action.Invoker");
-                    if (actionInvoker != null) actionParams = new Object[]{ actionInvoker };
+                    if (actionInvoker != null) { 
+                        actionParams = new Object[]{ actionInvoker };
+                    }
                     
                     Object bb = command.getClientProperty("Action.Bean");
-                    if (bb == null) bb = binding.getBean(); 
+                    if ( bb == null ) { 
+                        bb = binding.getBean();
+                    } 
                     
-                    if (hasMethod(bb, action, actionParams))
+                    if (hasMethod(bb, action, actionParams)) {
                         outcome = resolver.invoke(bb, action, actionParams);
-                    else 
+                    } else {
                         outcome = resolver.invoke(bb, action, null, null); 
+                    } 
                 } 
                 else { 
                     outcome = action;
                 }
                 
-                if ( command.isUpdate() ) binding.update();
+                if ( command.isUpdate() ) {
+                    binding.update();
+                }
             }
             
             //notify handlers who hooked after execution
@@ -101,7 +109,9 @@ public class UICommandUtil {
                     
                 } else if (opener.isAsync()) {
                     String str = opener.getTarget();
-                    if (!"popup".equals(str)) opener.setTarget("popup"); 
+                    if (!"popup".equals(str)) { 
+                        opener.setTarget("popup");
+                    } 
                     
                     outcome = "_close"; 
                     uics.navigate(binding, opener); 
@@ -147,10 +157,12 @@ public class UICommandUtil {
 
             return null;
         } 
-        catch(Exception ex) 
-        {
-            Exception e = ExceptionManager.getOriginal(ex); 
-            if (e instanceof IgnoreException || e instanceof BreakException) return null; 
+        catch(Throwable t) {
+            Exception ex = (t instanceof Exception ? (Exception) t : new RuntimeException(t)); 
+            Exception e = ExceptionManager.getOriginal( ex ); 
+            if (e instanceof IgnoreException || e instanceof BreakException) {
+                return null;
+            } 
          
             if (!ExceptionManager.getInstance().handleError(e)) { 
                 ctx.getPlatform().showError((JComponent) command, ex); 
@@ -167,46 +179,58 @@ public class UICommandUtil {
 
         ClientContext ctx = ClientContext.getCurrentContext();
         MethodResolver resolver = MethodResolver.getInstance();  
-        try 
-        {
+        try {
             Object[] actionParams = new Object[]{};
             Object actionInvoker = action.getProperties().get("Action.Invoker");
-            if (actionInvoker != null) actionParams = new Object[]{ actionInvoker };
+            if (actionInvoker != null) { 
+                actionParams = new Object[]{ actionInvoker };
+            }
 
             Object outcome = null;            
             String command = action.getName();
-            if (hasMethod(binding.getBean(), command, actionParams))
+            if (hasMethod(binding.getBean(), command, actionParams)) {
                 outcome = resolver.invoke(binding.getBean(), command, actionParams);
-            else 
+            } 
+            else {
                 outcome = resolver.invoke(binding.getBean(), command, null, null); 
+            }
             
-            if (outcome != null) binding.fireNavigation(outcome);
+            if (outcome != null) { 
+                binding.fireNavigation(outcome);
+            }
         }
-        catch(Exception ex) 
-        {
+        catch(Throwable t) {
+            Exception ex = (t instanceof Exception ? (Exception) t : new RuntimeException(t)); 
             Exception e = ExceptionManager.getOriginal(ex); 
-            if (e instanceof IgnoreException || e instanceof BreakException) return; 
+            if (e instanceof IgnoreException || e instanceof BreakException) { 
+                return;
+            } 
             
-            if (!ExceptionManager.getInstance().handleError(e))
+            if (!ExceptionManager.getInstance().handleError(e)) {
                 ctx.getPlatform().showError(invoker, ex);
+            }
         }        
     }
     
-    public static void processAction(JComponent invoker, Binding binding, Opener anOpener) 
-    {
+    public static void processAction(JComponent invoker, Binding binding, Opener anOpener) {
         if ( Beans.isDesignTime() ) return;
 
         ClientContext ctx = ClientContext.getCurrentContext();
         try {
-            if (anOpener != null) binding.fireNavigation(anOpener);
+            if (anOpener != null) { 
+                binding.fireNavigation(anOpener);
+            }
         }
-        catch(Exception ex) 
-        {            
+        catch(Throwable t) {
+            Exception ex = (t instanceof Exception ? (Exception) t : new RuntimeException(t)); 
             Exception e = ExceptionManager.getOriginal(ex); 
-            if (e instanceof IgnoreException || e instanceof BreakException) return; 
+            if (e instanceof IgnoreException || e instanceof BreakException) { 
+                return;
+            } 
             
-            if (!ExceptionManager.getInstance().handleError(e))
+            if (!ExceptionManager.getInstance().handleError(e)) {
                 ctx.getPlatform().showError(invoker, ex);
+            }
         }        
     }    
     

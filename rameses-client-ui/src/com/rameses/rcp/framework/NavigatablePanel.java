@@ -9,6 +9,7 @@ import java.util.Stack;
 public interface NavigatablePanel {
     
     public final static String PROPERTY_ID = "navigatable-panel-id"; 
+    public final static String RENDER_VIEW = "navigatable-panel-render-view";
     
     /***
      * returns the Stack of UIControllers in the NavigatablePanel

@@ -9,9 +9,7 @@ import com.rameses.rcp.framework.*;
 import com.rameses.rcp.ui.UICommand;
 import com.rameses.rcp.ui.UIControl;
 import com.rameses.util.ValueUtil;
-import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.util.*;
 import javax.swing.JComponent;
 
@@ -88,7 +86,7 @@ public class NavigationHandlerImpl implements NavigationHandler {
                         curController.getCurrentView().refresh();
                         return;
                     }
-                    //check if controller has a page reolver
+                    //check if controller has a page resolver
                     controller.setCurrentView( opener.getOutcome() );
                 }
                 
@@ -160,7 +158,8 @@ public class NavigationHandlerImpl implements NavigationHandler {
                             navigate(panel, source, out);
                             return;
                         }
-                    } else {
+                    } 
+                    else {
                         Object h = panel.getClientProperty(SubWindow.class); 
                         if ( h instanceof SubWindow ) { 
                             ((SubWindow) h).closeWindow(); 
@@ -175,7 +174,7 @@ public class NavigationHandlerImpl implements NavigationHandler {
                     }
                     
                 } else if ( out.startsWith("_exit")) {
-                    //get the original owner of he window
+                    //get the original owner of the window
                     while ( conStack.size() > 1 ) {
                         conStack.pop();
                     }
@@ -183,7 +182,7 @@ public class NavigationHandlerImpl implements NavigationHandler {
                     platform.closeWindow(conId);
                     
                 } else if ( out.startsWith("_root") ) {
-                    //get the original owner of he window
+                    //get the original owner of the window
                     while ( conStack.size() > 1 ) {
                         conStack.pop();
                     }
@@ -202,8 +201,26 @@ public class NavigationHandlerImpl implements NavigationHandler {
                 }
             }
             
-            //refresh new view
-            panel.renderView();
+            boolean allow_render_view = ((outcome+"").matches("_close|_exit") ? false : true); 
+            if ( !conStack.isEmpty()) { 
+                allow_render_view = true;
+            } 
+            
+            JComponent jpanel = null; 
+            if ( panel instanceof JComponent ) {
+                jpanel = (JComponent) panel; 
+                jpanel.putClientProperty(NavigatablePanel.RENDER_VIEW, allow_render_view); 
+            }
+            
+            try {
+                //refresh new view
+                panel.renderView();
+            }
+            finally {
+                if ( jpanel != null ) {
+                    jpanel.putClientProperty(NavigatablePanel.RENDER_VIEW, null); 
+                }
+            }
             
             if ( panel.getControllers().size() <= 0 ) { 
                 String pid = (String) panel.getClientProperty( NavigatablePanel.PROPERTY_ID ); 

@@ -50,7 +50,7 @@ public class UIControllerPanel extends JPanel
     public UIControllerPanel(UIControllerContext controller) {
         initComponent();
         controllers.push( controller ); 
-        _build(); 
+        _build( true ); 
     }
     
     // <editor-fold defaultstate="collapsed" desc=" initComponent ">
@@ -151,30 +151,36 @@ public class UIControllerPanel extends JPanel
         return current.getCurrentView().getBinding().getDefaultButton();
     }
     
-    private void _build() {
+    private void _build( boolean allowViewRendering ) {
         UIControllerContext current = getCurrentController();
         contentPane.removeAll();
 
-        UIViewPanel view = null; 
-        if ( current != null ) {
-            view = current.getCurrentView();
-            Binding binding = view.getBinding();
-            binding.setViewContext( this ); 
-            binding.setController( current.getController()); 
-            
-            Object viewname = view.getClientProperty("View.name"); 
-            boolean activated = "true".equals(view.getClientProperty("UIViewPanel.activated")+"");
-            if (!activated) {
-                binding.fireActivatePage( viewname ); 
-                view.putClientProperty("UIViewPanel.activated", "true"); 
-            } 
-                        
-            contentPane.add( view ); 
-            view.requestFocusInWindow(); 
-            view.refresh(); 
-            binding.focusFirstInput(); 
-            binding.fireAfterRefresh( viewname ); 
+        if ( current == null ) {
+            SwingUtilities.updateComponentTreeUI(this);
+            return; 
+        }
+        
+        if ( !allowViewRendering ) {
+            return; 
+        }
+        
+        UIViewPanel view = current.getCurrentView();
+        Binding binding = view.getBinding();
+        binding.setViewContext( this ); 
+        binding.setController( current.getController()); 
+
+        Object viewname = view.getClientProperty("View.name"); 
+        boolean activated = "true".equals(view.getClientProperty("UIViewPanel.activated")+"");
+        if (!activated) {
+            binding.fireActivatePage( viewname ); 
+            view.putClientProperty("UIViewPanel.activated", "true"); 
         } 
+
+        contentPane.add( view ); 
+        view.requestFocusInWindow(); 
+        view.refresh(); 
+        binding.focusFirstInput(); 
+        binding.fireAfterRefresh( viewname ); 
         SwingUtilities.updateComponentTreeUI(this);
     }
     
@@ -184,7 +190,7 @@ public class UIControllerPanel extends JPanel
     
     public void setControllers(Stack<UIControllerContext> controllers) {
         this.controllers = controllers;
-        _build();
+        _build( true );
     }
     
     public UIControllerContext getCurrentController() {
@@ -195,7 +201,9 @@ public class UIControllerPanel extends JPanel
     }
     
     public void renderView() {
-        _build();
+        Object flag = getClientProperty(RENDER_VIEW); 
+        boolean allowViewRendering = ((flag+"").matches("false") ? false : true); 
+        _build( allowViewRendering );
     }
     
     public boolean close() {
