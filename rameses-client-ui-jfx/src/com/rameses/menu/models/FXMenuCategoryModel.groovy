@@ -111,6 +111,7 @@ class FXMenuCategoryModel {
                             onMessage: { msg ->
                                 def svc = getMenuNotificationService( nconn );
                                 def cnt = svc.getCount( [notificationid: nid] );
+                                //println "receive on message " + nid + " count is " + cnt;
                                 menuHtml.getWebEngine().call("updateCount", nid, cnt.count );                         
                             }
                        ] as DefaultNotificationHandler;

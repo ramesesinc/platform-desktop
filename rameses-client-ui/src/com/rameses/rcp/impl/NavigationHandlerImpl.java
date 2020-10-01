@@ -163,6 +163,7 @@ public class NavigationHandlerImpl implements NavigationHandler {
                         Object h = panel.getClientProperty(SubWindow.class); 
                         if ( h instanceof SubWindow ) { 
                             ((SubWindow) h).closeWindow(); 
+                            conStack.pop(); 
                             return; 
                         }
                         
@@ -171,6 +172,8 @@ public class NavigationHandlerImpl implements NavigationHandler {
                         
                         conId = (String) panel.getClientProperty( NavigatablePanel.PROPERTY_ID ); 
                         if ( conId != null ) platform.closeWindow( conId ); 
+                        
+                        conStack.pop(); 
                     }
                     
                 } else if ( out.startsWith("_exit")) {
