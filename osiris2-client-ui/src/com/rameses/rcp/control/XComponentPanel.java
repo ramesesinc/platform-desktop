@@ -71,6 +71,8 @@ public abstract class XComponentPanel extends JPanel
     }    
     public void afterLoad() {
     }
+    public void beforeRefresh(){
+    }
     public void afterRefresh() {
     } 
     
@@ -152,6 +154,8 @@ public abstract class XComponentPanel extends JPanel
     } 
 
     public void refresh() {  
+        beforeRefresh(); 
+        
         String expr = getVisibleWhen(); 
         if (expr != null && expr.trim().length() > 0) {
             boolean result = false; 
