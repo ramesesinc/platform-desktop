@@ -5,6 +5,7 @@
 package com.rameses.osiris3.platform;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -47,10 +48,27 @@ public final class LookAndFeelCustomizer {
         
         numformat = new DecimalFormat("0"); 
         UIDefaults uidefs = UIManager.getLookAndFeelDefaults();
+        HashMap localDefs = new HashMap();
         Iterator itr = uidefs.keySet().iterator();
         while (itr.hasNext()) {
-            Object key = itr.next(); 
-            Object val = uidefs.get( key ); 
+            Object key = null; 
+            try {
+                key = itr.next();
+            } catch(Throwable t) {
+                //do nothing 
+            } finally {
+                if ( key == null ) {
+                    continue; 
+                }
+            }
+            
+            Object val = null; 
+            try {
+                val = uidefs.get( key );
+            } catch(Throwable t) {
+                //do nothing 
+            } 
+            
             if ( val instanceof FontUIResource ) {
                 FontUIResource old = (FontUIResource) val; 
                 int fsize = old.getSize(); 
@@ -67,11 +85,18 @@ public final class LookAndFeelCustomizer {
                     fsize = numformat.parse( numformat.format( num )).intValue(); 
                 } catch(Throwable t) {;} 
                     
-                String fname = ( fontname == null ? old.getFontName() : fontname );
-                uidefs.put(key, new FontUIResource(fname, old.getStyle(), fsize)); 
-                if ( debug ) System.out.println(key + " = "+ uidefs.get(key));
+                String fname = ( fontname == null ? old.getFontName() : fontname ); 
+                localDefs.put(key, new FontUIResource(fname, old.getStyle(), fsize)); 
             } 
         }  
+        
+        try {
+            uidefs.putAll( localDefs ); 
+        } catch(Throwable t) {
+            t.printStackTrace(); 
+        }
+        
+        localDefs.clear(); 
     }
     
     private final String SPECIAL_KEYS = "ColorChooser|InternalFrame|Menu|MenuBar|MenuItem|OptionPane|RadioButtonMenuItem|TextArea|ToolTip";
