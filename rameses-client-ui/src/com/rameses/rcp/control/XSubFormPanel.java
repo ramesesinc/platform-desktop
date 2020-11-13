@@ -10,6 +10,7 @@ import com.rameses.rcp.common.Opener;
 import com.rameses.rcp.framework.UIController;
 import com.rameses.rcp.framework.UIControllerContext;
 import com.rameses.rcp.framework.UIControllerPanel;
+import com.rameses.rcp.framework.UIViewPanel;
 import com.rameses.rcp.support.MouseEventSupport;
 import com.rameses.rcp.ui.BindingConnector;
 import com.rameses.rcp.ui.ControlProperty;
@@ -31,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -443,7 +443,15 @@ public class XSubFormPanel extends JPanel implements UISubControl, ActiveControl
         List<Binding> list = new ArrayList();
 
         for (SubFormContext sfc : subFormItems) {
-            list.add(sfc.getCurrentController().getCurrentView().getBinding());
+            if ( sfc == null ) { continue; }
+            
+            UIControllerContext ucc = sfc.getCurrentController();
+            if ( ucc == null ) { continue; } 
+            
+            UIViewPanel uiv = ucc.getCurrentView(); 
+            if ( uiv == null ) { continue; } 
+            
+            list.add(uiv.getBinding());
         }
 
         return list;
