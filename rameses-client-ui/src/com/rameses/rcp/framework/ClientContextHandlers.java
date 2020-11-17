@@ -47,12 +47,40 @@ final class ClientContextHandlers {
             handlers.clear(); 
         }
         
-        Iterator itr = com.rameses.util.Service.providers( ClientContextHandler.class, loader ); 
-        while (itr.hasNext()) { 
-            ClientContextHandler h = (ClientContextHandler) itr.next(); 
-            handlers.add( h ); 
-            startImpl( h ); 
-        } 
+        ClassLoader loader1 = getClass().getClassLoader(); 
+        ClassLoader loader0 = (loader == null ? loader1 : loader); 
+        List<ClassLoader> loaders = new ArrayList(); 
+        if ( !loaders.contains( loader0 )) {
+            loaders.add( loader0 ); 
+        }
+        if ( !loaders.contains( loader1 )) {
+            loaders.add( loader1 ); 
+        }
+
+        List list = new ArrayList();
+        while ( !loaders.isEmpty()) {
+            ClassLoader cl = loaders.remove(0); 
+            Iterator itr = com.rameses.util.Service.providers( ClientContextHandler.class, cl ); 
+            while (itr.hasNext()) { 
+                Object o = itr.next(); 
+                if ( !list.contains( o.getClass())) {
+                    list.add( o.getClass()); 
+                    
+                    ClientContextHandler h = (ClientContextHandler) o;
+                    handlers.add( h ); 
+                    startImpl( h ); 
+                }
+            }
+        }
+        list.clear(); 
+        
+//        Iterator itr = com.rameses.util.Service.providers( ClientContextHandler.class, loader ); 
+//        while (itr.hasNext()) { 
+//            ClientContextHandler h = (ClientContextHandler) itr.next(); 
+//            System.out.println("client context handler -> " + h);
+//            handlers.add( h ); 
+//            startImpl( h ); 
+//        } 
         
         this.loader = loader; 
     }
@@ -85,6 +113,7 @@ final class ClientContextHandlers {
     private void startImpl( final ClientContextHandler cch ) {
         exec.submit( new Runnable() {
             public void run() {
+                System.out.println("start client context handler -> " + cch);
                 cch.start(); 
             }
         }); 

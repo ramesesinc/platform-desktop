@@ -140,7 +140,6 @@ public abstract class ClientContext
         try { 
             URL.setURLStreamHandlerFactory( URLStreamHandlers.getFactory()); 
         } catch(Throwable t) { 
-            t.printStackTrace(); 
         } 
         
         ClientContextHandlers.load( currentContext.getClassLoader()); 
