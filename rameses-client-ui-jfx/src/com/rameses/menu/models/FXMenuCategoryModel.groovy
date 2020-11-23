@@ -28,6 +28,9 @@ class FXMenuCategoryModel {
     
     @Caller
     def caller;
+    
+    @Script("User")
+    def userInfo;
 
     def clientContext = com.rameses.rcp.framework.ClientContext.currentContext;
     def session = OsirisContext.getSession();
@@ -111,8 +114,10 @@ class FXMenuCategoryModel {
                             onMessage: { msg ->
                                 def svc = getMenuNotificationService( nconn );
                                 def cnt = svc.getCount( [notificationid: nid] );
-                                //println "receive on message " + nid + " count is " + cnt;
-                                menuHtml.getWebEngine().call("updateCount", nid, cnt.count );                         
+                                if( cnt ) {
+                                    //println "receive on message " + nid + " count is " + cnt;
+                                    menuHtml.getWebEngine().call("updateCount", nid, cnt.count );                                                             
+                                }
                             }
                        ] as DefaultNotificationHandler;
                        notifyHandlers.put( nid, notifyHandler );

@@ -76,7 +76,8 @@ class FXHomeMenuModel {
                 def nid = it.properties?.notificationid;
                 def conn = null;
                 if( it instanceof InvokerAction ) {
-                    conn = it.invoker?.module.name?.trim();
+                    conn = it.invoker?.module?.properties?.connection?.trim();
+                    if(!conn) conn = it.invoker?.module.name?.trim();
                 }
                 def notifyHandler = [
                     onMessage: { msg ->
