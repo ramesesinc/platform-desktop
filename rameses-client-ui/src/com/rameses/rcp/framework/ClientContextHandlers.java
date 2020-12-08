@@ -113,7 +113,6 @@ final class ClientContextHandlers {
     private void startImpl( final ClientContextHandler cch ) {
         exec.submit( new Runnable() {
             public void run() {
-                System.out.println("start client context handler -> " + cch);
                 cch.start(); 
             }
         }); 
