@@ -156,7 +156,7 @@ class FXHomeMenuModel {
             buff.append( """
                 <div class=\"menu grow-shadow\">
                 <a href=\"#\" action=\"openItem\" id=\"${itm.hashCode()}\">
-                <img src=\"classpath://${itm.icon}\" width=\"48\">
+                <img src=\"classpath://${itm.icon}\" width=\"48\" style=\"min-height:48px; max-width:48px;\" />
                 <label>${itm.caption}</label>""");
             if( itm.properties?.notificationid !=null ) {
                 buff.append( """<span class=\"msgcount\" id=\"${itm.properties.notificationid}\"></span>"""  );
@@ -183,40 +183,46 @@ class FXHomeMenuModel {
     }
     
    
-    
     def buildHtml( content ) {
-        String script = """
+        String styles = """
         <style>
         body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-          "Segoe UI Symbol";
-          color: #444;
-          font-size:10px;
+            color: #444;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+            Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", 
+            "Segoe UI Symbol";
+        }
+        .menu-container{
+             display:flex;
+             flex-wrap:wrap;
         }
         .menu{
-            display: inline-block;
-            vertical-align: top;
-            margin-bottom: 20px;
-            width: 80px;
-            height:80px;
-            margin-left: 5px;
+            width: 94px;
             text-align: center;
-            padding: 10px 5px 5px 5px;
-        }
+            vertical-align: top;
+            margin-bottom: 5px;
+            margin-top: 10px;
+            padding: 8px 3px 8px 3px;
+        }        
         .menu a{
+            color: #000;
+            font-size: 11px;
             text-decoration: none;
-            color:#000;
-            font-size: 12px;
+            -webkit-user-select: none;  
+            -moz-user-select: none;    
+            -ms-user-select: none;      
+            user-select: none;
         }
         .menu img{
             margin: 0 auto;
             display: flex;
-            margin-bottom:15px;
+        }
+        .menu p{
+            margin: 3px 0px 0px 0px;
         }
         .grow-shadow {
-        -webkit-transition: all .2s ease-in-out;
-                transition: all .2s ease-in-out;
+            -webkit-transition: all .2s ease-in-out;
+                    transition: all .2s ease-in-out;
         }
         .grow-shadow:hover {
             -webkit-transform: scale(1.1);
@@ -225,21 +231,21 @@ class FXHomeMenuModel {
             box-shadow: 0px 5px 9px #C7C7C7;
             background: #eaf1f9;
         }
-        .grow-shadow label:hover {
-            text-decoration: underline;
-            color: blue;
-        }
         .active {
             -webkit-transform: scale(1.1);
             -ms-transform: scale(1.1);
             transform: scale(1.1);
             box-shadow: 0px 5px 9px #C7C7C7;
-            background: #b8daff;
+            background: #b8daff;;
         }
+
         .menu .msgcount {
             color: red; font-weight: bold;
         }
         </style> 
+        """; 
+        
+        def scripts = """ 
         <script> 
         function updateCount( elemid, value ) {
             if( value != null && value > 0 ) {
@@ -253,13 +259,17 @@ class FXHomeMenuModel {
         } 
         </script>
         """; 
+        
         def buff = new StringBuilder(); 
         buff.append("<html>");
         buff.append("<head>");
-        buff.append( script ); 
+        buff.append( styles ); 
+        buff.append( scripts ); 
         buff.append("</head>");
         buff.append("<body>");
+        buff.append('<div class="menu-container">');
         buff.append( content ); 
+        buff.append("</div>");
         buff.append("</body>");
         buff.append("</html>");
         return buff.toString(); 
