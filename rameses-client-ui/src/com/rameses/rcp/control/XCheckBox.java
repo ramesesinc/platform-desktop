@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.ButtonModel;
+import javax.swing.DefaultButtonModel;
 import javax.swing.JCheckBox;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -460,4 +462,5 @@ public class XCheckBox extends JCheckBox implements UIInput, ActiveControl, Mous
     }
     
     // </editor-fold>    
+
 }
