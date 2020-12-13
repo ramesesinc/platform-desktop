@@ -131,6 +131,23 @@ final class OSManager
         } 
     }
     
+    void updateRegistry( String old_id, String new_id, OSView view ) {
+        synchronized (VIEW_LOCK) {        
+            if ( view == null ) {
+                throw new RuntimeException("updateRegistry requires a 'view' parameter");
+            }  
+            if ( old_id == null || old_id.trim().length() == 0) {
+                throw new RuntimeException("updateRegistry requires a 'old_id' parameter");
+            }
+            if ( new_id == null || new_id.trim().length() == 0) {
+                throw new RuntimeException("updateRegistry requires a 'new_id' parameter");
+            }
+            
+            views.remove( old_id );
+            views.put( new_id, view ); 
+        } 
+    }
+    
     OSView lookupView(String id) {
         if (id == null) return null;
         

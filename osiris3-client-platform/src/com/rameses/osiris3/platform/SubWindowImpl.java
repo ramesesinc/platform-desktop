@@ -100,14 +100,21 @@ class SubWindowImpl extends JPanel implements SubWindow, ContentPane
     public void update(Map attrs) {
         if (attrs == null || attrs.isEmpty()) return;
         
-        Object oid = attrs.remove("id");
-        if (oid != null) this.id = oid.toString();
-        
         Object otitle = attrs.remove("title");
-        if (otitle != null) this.title = otitle.toString();
+        if (otitle != null) { 
+            this.title = otitle.toString();
+        }
+
+        Object oid = attrs.remove("id");
+        if (oid != null) {
+            String old_id = this.id; 
+            this.id = oid.toString(); 
+            OSManager.getInstance().updateRegistry(old_id, this.id, this.view); 
+        }
         
-        if (this.listener != null) 
+        if (this.listener != null) { 
             this.listener.fireUpdate(this); 
+        }
     }
     
     // </editor-fold>    

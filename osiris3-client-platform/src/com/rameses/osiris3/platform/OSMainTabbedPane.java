@@ -228,8 +228,12 @@ class OSMainTabbedPane extends WindowTabbedPane implements WindowContainer, SubW
         }
         
         public void requestFocus() { 
-            root.setSelectedComponent(view); 
-            if (subWindow != null) subWindow.activate(); 
+            if (indexOfComponent(view) >= 0) {
+                root.setSelectedComponent(view); 
+            }
+            if (subWindow != null) {
+                subWindow.activate();
+            } 
         }  
 
         public void closeView() { 
