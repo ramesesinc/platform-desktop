@@ -39,7 +39,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1439,10 +1438,21 @@ public class Binding
             update(props); 
         } 
         
-        public void update(Map windowAttributes) {
+        public void update(Map attrs) {
             SubWindow win = getCurrentWindow();
-            if (win != null) win.update(windowAttributes);             
-        }        
+            if (win == null || attrs == null || attrs.isEmpty()) return; 
+            
+            Object oid = attrs.get("id"); 
+            if ( oid != null ) {
+                UIViewPanel uiv = root.getOwner(); 
+                Object oval = (uiv == null ? null : uiv.getClientProperty(UIControllerContext.class)); 
+                if ( oval instanceof UIControllerContext ) {
+                    ((UIControllerContext) oval).setId( oid.toString() ); 
+                }
+            }
+            
+            win.update(attrs); 
+        } 
         
         private void loadFormPropertiesFromAnnotation(Map props, Object bean, Class beanClass) 
         {
