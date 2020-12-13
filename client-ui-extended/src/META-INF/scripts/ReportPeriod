@@ -16,18 +16,18 @@ public class ReportPeriod
     ];
 
     def _months = [
-        [index:1, qtr:1, title:'JANUARY'], 
-        [index:2, qtr:1, title:'FEBRUARY'], 
-        [index:3, qtr:1, title:'MARCH'], 
-        [index:4, qtr:2, title:'APRIL'], 
-        [index:5, qtr:2, title:'MAY'], 
-        [index:6, qtr:2, title:'JUNE'], 
-        [index:7, qtr:3, title:'JULY'], 
-        [index:8, qtr:3, title:'AUGUST'], 
-        [index:9, qtr:3, title:'SEPTEMBER'], 
-        [index:10, qtr:4, title:'OCTOBER'], 
-        [index:11, qtr:4, title:'NOVEMBER'], 
-        [index:12, qtr:4, title:'DECEMBER'] 
+        [index:1, qtr:1, title:'JANUARY', caption:'JANUARY'], 
+        [index:2, qtr:1, title:'FEBRUARY', caption:'FEBRUARY'], 
+        [index:3, qtr:1, title:'MARCH', caption:'MARCH'], 
+        [index:4, qtr:2, title:'APRIL', caption:'APRIL'], 
+        [index:5, qtr:2, title:'MAY', caption:'MAY'], 
+        [index:6, qtr:2, title:'JUNE', caption:'JUNE'], 
+        [index:7, qtr:3, title:'JULY', caption:'JULY'], 
+        [index:8, qtr:3, title:'AUGUST', caption:'AUGUST'], 
+        [index:9, qtr:3, title:'SEPTEMBER', caption:'SEPTEMBER'], 
+        [index:10, qtr:4, title:'OCTOBER', caption:'OCTOBER'], 
+        [index:11, qtr:4, title:'NOVEMBER', caption:'NOVEMBER'], 
+        [index:12, qtr:4, title:'DECEMBER', caption:'DECEMBER'] 
     ]; 
 
     public def getQuarters() { return _quarters; }
