@@ -73,7 +73,8 @@ public class PageFlowInstance {
         catch(RuntimeException re) {
             throw re;
         }
-        catch(Exception ex) {
+        catch(Throwable ex) {
+            ex.printStackTrace();
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
@@ -146,6 +147,8 @@ public class PageFlowInstance {
                 MethodResolver.getInstance().invoke(workunit.getController(), t.getAction(), null );
             }
             catch(Exception e) {
+                System.out.println("[PageFlowInstance] fireTransitionAction error...");
+                e.printStackTrace();
                 throw ExceptionManager.getOriginal(e);
             }
         }
