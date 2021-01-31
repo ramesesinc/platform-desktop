@@ -159,26 +159,39 @@ public class ReportPeriod
         def m = [:]; 
         if ( type == 'yearly' ) { 
             if ( !params.year ) throw new Exception('year parameter is required'); 
+
+            params.qtr = params.month = params.date = params.startdate = params.enddate = null; 
             m.startdate = format( getYearStartDate( params.year ), 'yyyy-MM-dd HH:mm:ss' );
             m.enddate   = format( getYearEndDate( params.year ), 'yyyy-MM-dd HH:mm:ss' );
-        } else if ( type == 'quarterly' ) {
+        } 
+        else if ( type == 'quarterly' ) {
             if ( !params.year ) throw new Exception('year parameter is required'); 
             if ( !params.qtr ) throw new Exception('qtr parameter is required'); 
+
+            params.month = params.date = params.startdate = params.enddate = null; 
             m.startdate = format( getQtrStartDate( params.year, params.qtr ), 'yyyy-MM-dd HH:mm:ss' );
             m.enddate   = format( getQtrEndDate( params.year, params.qtr ), 'yyyy-MM-dd HH:mm:ss' );
-        } else if ( type == 'monthly' ) { 
+        } 
+        else if ( type == 'monthly' ) { 
             if ( !params.year ) throw new Exception('year parameter is required'); 
             if ( !params.month?.index ) throw new Exception('month.index parameter is required'); 
+
+            params.qtr = params.date = params.startdate = params.enddate = null; 
             m.startdate = format( getMonthStartDate( params.year, params.month.index ), 'yyyy-MM-dd HH:mm:ss' );
             m.enddate   = format( getMonthEndDate( params.year, params.month.index ), 'yyyy-MM-dd HH:mm:ss' );
-        } else if ( type == 'daily' ) { 
+        } 
+        else if ( type == 'daily' ) { 
             if ( !params.date ) throw new Exception('date parameter is required'); 
+
+            params.year = params.qtr = params.month = params.startdate = params.enddate = null; 
             m.startdate = ''+ parse( params.date ) +' 00:00:00'; 
             m.enddate   = ''+ parse( params.date ) +' 23:59:59'; 
-        } else if ( type == 'range' ) { 
+        } 
+        else if ( type == 'range' ) { 
             if ( !params.startdate ) throw new Exception('startdate parameter is required'); 
             if ( !params.enddate ) throw new Exception('enddate parameter is required'); 
 
+            params.year = params.qtr = params.month = params.date = null; 
             m.startdate = parse( params.startdate );
             m.enddate   = parse( params.enddate );
             if ( m.startdate.after( m.enddate )) 
@@ -186,7 +199,8 @@ public class ReportPeriod
 
             m.startdate = ''+ m.startdate +' 00:00:00'; 
             m.enddate   = ''+ m.enddate   +' 23:59:59'; 
-        } else {
+        } 
+        else {
             throw new Exception('invalid type '+ type); 
         } 
         return m; 
