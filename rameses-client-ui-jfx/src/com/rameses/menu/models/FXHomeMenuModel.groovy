@@ -81,9 +81,14 @@ class FXHomeMenuModel {
                 }
                 def notifyHandler = [
                     onMessage: { msg ->
-                        def svc = getMenuNotificationService( conn );
-                        def cnt = svc.getCount( [notificationid: nid] );
-                        menuHtml.getWebEngine().call("updateCount", nid, cnt.count );                         
+                        try {
+                            def svc = getMenuNotificationService( conn );
+                            def cnt = svc.getCount( [notificationid: nid] );
+                            menuHtml.getWebEngine().call("updateCount", nid, cnt.count );                                                     
+                        }
+                        catch(mex) {
+                            System.out.println("Error connection "+conn + "->"+mex.getMessage());
+                        }
                     }
                 ] as DefaultNotificationHandler;
                 notifyHandlers.put( nid, notifyHandler);
