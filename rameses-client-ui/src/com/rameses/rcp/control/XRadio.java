@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
+import javax.swing.DefaultButtonModel;
 import javax.swing.JComponent;
 import javax.swing.JRadioButton;
 import javax.swing.KeyStroke;
@@ -59,6 +61,8 @@ public class XRadio extends JRadioButton implements UIInput, ItemListener,
     // <editor-fold defaultstate="collapsed" desc=" init components ">    
     
     private void initComponent() {
+        setModel(new ToggleButtonModelImpl());
+        
         addItemListener(this);
         new MouseEventSupport(this).install();
         
@@ -213,6 +217,15 @@ public class XRadio extends JRadioButton implements UIInput, ItemListener,
     }
 
     public Object getValue() {
+        ButtonModel bm = getModel();
+        if ( bm instanceof DefaultButtonModel ) {
+            DefaultButtonModel dbm = (DefaultButtonModel) bm;
+            Object sel = (dbm.getGroup() == null ? null : dbm.getGroup().getSelection()); 
+            if ( sel instanceof ToggleButtonModelImpl ) {
+                return ((ToggleButtonModelImpl) sel).getOptionValue(); 
+            }
+        }
+        
         if (isSelected()) {
             return optionValue;
         } else {
@@ -420,4 +433,14 @@ public class XRadio extends JRadioButton implements UIInput, ItemListener,
         super.setText(sb.toString());
     }
     // </editor-fold>
+    
+    
+    private class ToggleButtonModelImpl extends ToggleButtonModel {
+        
+        XRadio root = XRadio.this;
+        
+        public Object getOptionValue() {
+            return root.getOptionValue(); 
+        }
+    }
 }

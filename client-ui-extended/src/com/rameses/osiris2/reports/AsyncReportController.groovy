@@ -57,10 +57,13 @@ public abstract class AsyncReportController {
     void buildResult( data ) {
     }
     
+    boolean has_errors;
+    
     def preview() {
+        has_errors = false; 
         asyncHandler = [
             onError: {o-> 
-                println o;
+                has_errors = true; 
                 MsgBox.err(o?.message + ""); 
                 back();
                 binding.refresh(); 
@@ -78,14 +81,16 @@ public abstract class AsyncReportController {
                         binding.refresh(); 
                     } 
                     
-                } else if (o instanceof Throwable) { 
+                } 
+                else if (o instanceof Throwable) { 
                     MsgBox.err(o.message); 
                     asyncHandler.cancel();
                     back();
                     binding.refresh();
                     
-                } else {
-                    if (o instanceof Map) {
+                } 
+                else if ( !has_errors ) { 
+                    if (o instanceof Map) { 
                         data = o; 
                     } else { 
                         data = [reportdata: o]; 
@@ -109,8 +114,10 @@ public abstract class AsyncReportController {
     } 
         
     void print() {
+        has_errors = false; 
         asyncHandler = [
             onError: {o-> 
+                has_errors = true; 
                 MsgBox.err(o.message); 
                 back();
                 binding.refresh(); 
@@ -129,13 +136,15 @@ public abstract class AsyncReportController {
                         binding.refresh(); 
                     } 
                     
-                } else if (o instanceof Throwable) { 
+                } 
+                else if (o instanceof Throwable) { 
                     MsgBox.err(o.message); 
                     asyncHandler.cancel();
                     back();
                     binding.refresh(); 
                     
-                } else {
+                } 
+                else if ( !has_errors ) {
                     data = o;                
                     has_result_preview = true; 
                     buildResult( data ); 

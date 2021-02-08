@@ -462,20 +462,30 @@ public class XActionBar extends JPanel implements UIComposite, ActiveControl, Mo
             if (expression != null && expression.trim().length() > 0) { 
                 try { 
                     boolean result = UIControlUtil.evaluateExprBoolean(binding.getBean(), expression); 
-                    btn.setVisible(result); 
-                } catch(Throwable t) { 
-                    btn.setVisible(false); 
-                    //t.printStackTrace();
+                    btn.setVisible( result ); 
+                } 
+                catch(Throwable t) { 
+                    btn.setVisible( false ); 
                 }
-                
-            } else { 
-                if ( btn.getClientProperty("default.button") != null ) {
-                    if ( getRootPane() != null ) { 
-                        getRootPane().setDefaultButton( btn );
-                    } else { 
-                        binding.setDefaultButton( btn ); 
-                    } 
-                }
+            } 
+            
+            expression = (String) btn.getClientProperty("disableWhen");
+            if (expression != null && expression.trim().length() > 0) { 
+                try { 
+                    boolean result = UIControlUtil.evaluateExprBoolean(binding.getBean(), expression); 
+                    btn.setEnabled( !result ); 
+                } 
+                catch(Throwable t) { 
+                    btn.setEnabled( false ); 
+                } 
+            } 
+
+            if ( btn.getClientProperty("default.button") != null ) {
+                if ( getRootPane() != null ) { 
+                    getRootPane().setDefaultButton( btn );
+                } else { 
+                    binding.setDefaultButton( btn ); 
+                } 
             }
             
             if ( dirty ) toolbarComponent.add(btn); 

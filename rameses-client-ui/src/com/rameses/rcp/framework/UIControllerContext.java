@@ -99,6 +99,8 @@ public class UIControllerContext {
                 throw new Exception("Template " + view.getTemplate() + " should not be an instance of UIViewPanel.");
             
             viewPanel = new UIViewPanel();
+            viewPanel.putClientProperty(UIControllerContext.class, this); 
+            
             Binding binding = viewPanel.getBinding();
             binding.setController(controller);
             
