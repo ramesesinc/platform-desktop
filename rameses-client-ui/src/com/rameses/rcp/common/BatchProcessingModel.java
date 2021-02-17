@@ -133,7 +133,7 @@ public abstract class BatchProcessingModel implements BatchProcessingHandler {
     } 
 
     
-    public class ProgressStatus {
+    public class ProgressStatus extends ProgressModel {
         
         BatchProcessingModel root = BatchProcessingModel.this;
         
@@ -265,8 +265,9 @@ public abstract class BatchProcessingModel implements BatchProcessingHandler {
                     stat.startRow += 1; 
                     root.processItem( items[i] ); 
                     root.notifyOnRefresh( pg ); 
+                    //Thread.sleep(500);
                 } 
-                
+                //System.out.println("startt row is " + stat.startRow);
                 if ( cancelled ) break; 
                 if ( stat.startRow >= stat.totalCount ) break; 
             }
