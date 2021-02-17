@@ -757,6 +757,9 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
                         UIControlUtil.setBeanValue(root.getBinding(), root.getVarStatus(), stat); 
                     }
 
+                    //notify value change support 
+                    binding.getValueChangeSupport().notify( root.getName(), value ); 
+                    
                     EventQueue.invokeLater(new Runnable(){
                         public void run() {
                             try { 
