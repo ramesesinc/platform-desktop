@@ -78,6 +78,7 @@ public class SuspendPage extends javax.swing.JPanel {
         xButton4.setImmediate(true);
         xButton4.setMargin(new java.awt.Insets(5, 14, 5, 14));
         xButton4.setText("Log Off");
+        xButton4.setEnabled(false); 
         jPanel1.add(xButton4);
 
         xButton3.setMnemonic('u');
