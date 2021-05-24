@@ -10,9 +10,12 @@ package com.rameses.rcp.common;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FormControl 
-{    
-    private static final long serialVersionUID = 1L;
+public class FormControl {
+    
+    public final static String PROP_PREFERRED_SIZE = "PreferredSize"; 
+    
+    private static final long serialVersionUID = 1L;    
+
     private Map properties = new HashMap();
     private String categoryid;
     private String type;
