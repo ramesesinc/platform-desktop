@@ -33,10 +33,19 @@ import javax.swing.JComponent;
 public class MouseEventSupport implements MouseListener
 {
     private JComponent component;
+    private UIControl uicontrol; 
     private boolean processing;
     
     public MouseEventSupport(JComponent component) { 
         this.component = component; 
+        if ( component instanceof UIControl ) {
+            this.uicontrol = (UIControl) component;
+        }
+    } 
+
+    public MouseEventSupport(JComponent component, UIControl uicontrol) { 
+        this.component = component; 
+        this.uicontrol = uicontrol; 
     } 
     
     public void install() {
@@ -85,16 +94,18 @@ public class MouseEventSupport implements MouseListener
     } 
     
     public void showComponentInfo() {
-        if (!(component instanceof UIControl)) return;
+        if ( uicontrol == null ) {
+            return;
+        }
         
-        Binding binding = ((UIControl) component).getBinding();
+        Binding binding = uicontrol.getBinding();
         if (binding == null) return;
         
         Map params = new HashMap();
         params.put("properties", getInfo(binding.getBean())); 
-        
-        //find UIControllerPanel
-        Component fc = findComponent(component, ContentPane.View.class); 
+
+        Component uic = (Component) uicontrol;
+        Component fc = findComponent(uic, ContentPane.View.class); 
         if (fc instanceof ContentPane.View) { 
             Map info = ((ContentPane.View) fc).getInfo(); 
             params.put("info", (info == null? new HashMap(): info)); 
@@ -110,15 +121,14 @@ public class MouseEventSupport implements MouseListener
     
     private Map getInfo(Object bean) {
         Map info = new LinkedHashMap();
-        if (!(component instanceof UIControl)) return info;
+        if ( uicontrol == null ) return info;
         
-        info.put("controlClass", component.getClass().getSimpleName()); 
+        info.put("controlClass", uicontrol.getClass().getSimpleName()); 
         info.put("beanClass", (bean == null? null: bean.getClass().getSimpleName()));
         
-        UIControl uic = (UIControl) component;        
-        info.put("name", uic.getName()); 
-        info.put("index", uic.getIndex()); 
-        String[] depends = uic.getDepends(); 
+        info.put("name", uicontrol.getName()); 
+        info.put("index", uicontrol.getIndex()); 
+        String[] depends = uicontrol.getDepends(); 
         if (depends != null) {
             StringBuffer sb = new StringBuffer();
             for (String str: depends) {
@@ -127,13 +137,13 @@ public class MouseEventSupport implements MouseListener
                 sb.append(str);
             } 
             info.put("depends", sb.toString()); 
-        } else { 
+        } 
+        else { 
             info.put("depends", null); 
         } 
         
-        if (component instanceof ComponentInfo) 
-        {
-            Map props = ((ComponentInfo) component).getInfo(); 
+        if ( uicontrol instanceof ComponentInfo ) {
+            Map props = ((ComponentInfo) uicontrol).getInfo(); 
             if (props != null) { 
                 props.remove("name");
                 props.remove("index");

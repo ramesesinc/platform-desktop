@@ -54,6 +54,7 @@ import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+@Deprecated
 /**
  *
  * @author Windhel

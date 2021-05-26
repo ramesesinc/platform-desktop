@@ -47,8 +47,8 @@ public class UIControlBeanInfo extends DefaultBeanInfo {
         add( list, "captionPadding" );
         add( list, "cellPadding" );
         
-        addBoolean( list, "dynamic" );
+        addBoolean( list, "dynamic", true );
         addBoolean( list, "required", true );
-        addBoolean( list, "showCaption" );
+        addBoolean( list, "showCaption", true );
     }
 }
