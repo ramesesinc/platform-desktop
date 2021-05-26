@@ -275,8 +275,14 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
     private void refresh(boolean reload) {
         if (reload) buildList();
         
-        selectSelectedItems();        
-    }    
+        try {
+            model.is_adjusting = true; 
+            selectSelectedItems(); 
+        }
+        finally {
+            model.is_adjusting = false; 
+        }
+    } 
     
     public int compareTo(Object o) {
         return UIControlUtil.compare(this, o);
@@ -467,10 +473,11 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
                 System.out.println("[WARN] error get bean value caused by " + t.getMessage());
             }
 
-            if (value instanceof ListPaneModel) {
-                newModel = (ListPaneModel)value;
-            }        
-        } else if (hasItems) {
+            if (value instanceof ListPaneModel) { 
+                newModel = (ListPaneModel)value; 
+            } 
+        } 
+        else if (hasItems) {
             Object value = null; 
             try { 
                 value = UIControlUtil.getBeanValue(this, strItems); 
@@ -479,8 +486,15 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
             }
 
             newModel = new DefaultListPaneModel(value); 
+        }        
+        
+        try {
+            model.is_adjusting = true; 
+            loadItems(newModel); 
         }
-        loadItems(newModel);         
+        finally {
+            model.is_adjusting = false; 
+        }
     } 
     
     private void loadItems(ListPaneModel newModel) {
@@ -489,7 +503,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
         Map params = new HashMap(); 
         List list = newModel.fetchList(params); 
         if (list == null) list = new ArrayList();
-            
+
         model.clear(); 
         int i = 0; 
         for (Object o: list) { 
@@ -723,50 +737,53 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
         XList root = XList.this; 
         List<ListSelectionListener> listeners = new ArrayList(); 
         
-        void remove(ListSelectionListener listener) 
-        {
-            if (listener != null) listeners.remove(listener); 
+        void remove(ListSelectionListener listener) {
+            if (listener != null) {
+                listeners.remove(listener); 
+            }
         }
         
-        void add(ListSelectionListener listener) 
-        {
-            if (listener != null) 
-            {
+        void add(ListSelectionListener listener) {
+            if (listener != null) {
                 listeners.remove(listener); 
                 listeners.add(listener); 
             }
         }
         
-        public void valueChanged(final ListSelectionEvent evt) 
-        {
-            try 
-            {
-                int selIndex = root.getSelectedIndex(); 
-                if (selIndex != -1 && !evt.getValueIsAdjusting()) 
-                {
-                    Object value = (root.isMultiselect()? root.getSelectedValues(): root.getSelectedValue());
-                    UIControlUtil.setBeanValue(root.getBinding(), root.getName(), value);
-                    
-                    if (root.getVarStatus() != null) 
-                    {
-                        ItemStatus stat = new ItemStatus();
-                        stat.multiSelect = root.isMultiselect(); 
-                        stat.index = root.getSelectedIndex();
-                        stat.name = root.getName();                        
-                        stat.value = value;
-                        UIControlUtil.setBeanValue(root.getBinding(), root.getVarStatus(), stat); 
-                    }
+        public void valueChanged(final ListSelectionEvent evt) {
 
-                    //notify value change support 
-                    binding.getValueChangeSupport().notify( root.getName(), value ); 
+            if ( root.model.is_adjusting ) return; 
+            
+            try {
+                final Binding binding = root.getBinding(); 
+                int selIndex = root.getSelectedIndex(); 
+                if (selIndex != -1 && !evt.getValueIsAdjusting()) {
+                    final Object oldValue = UIControlUtil.getBeanValue( binding, root.getName()); 
+                    final Object newValue = (root.isMultiselect()? root.getSelectedValues(): root.getSelectedValue());
+                    final boolean beanValueChanged = !ValueUtil.isEqual(oldValue, newValue); 
+                    
+                    if ( beanValueChanged ) {
+                        UIControlUtil.setBeanValue( binding, root.getName(), newValue);
+                    
+                        if (root.getVarStatus() != null) {
+                            ItemStatus stat = new ItemStatus();
+                            stat.multiSelect = root.isMultiselect(); 
+                            stat.index = root.getSelectedIndex();
+                            stat.name = root.getName();                        
+                            stat.value = newValue;
+                            UIControlUtil.setBeanValue(root.getBinding(), root.getVarStatus(), stat); 
+                        }
+
+                        binding.getValueChangeSupport().notify( root.getName(), newValue ); 
+                    }
                     
                     EventQueue.invokeLater(new Runnable(){
                         public void run() {
                             try { 
                                 if (root.listPaneModel == null) return;
 
-                                root.listPaneModel.onselect(root.getSelectedValue()); 
-                            } catch(Throwable e) {
+                                root.listPaneModel.onselect( newValue ); 
+                            } catch(Throwable e) { 
                                 System.out.println("[WARN] error onselect caused by " + e.getMessage()); 
                             } 
                         } 
@@ -782,7 +799,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
                 //notify listeners
                 notifyListeners(evt);
             }
-            catch(Exception ex) {
+            catch(Throwable ex) {
                 MsgBox.err(ex); 
             }
         }
@@ -834,6 +851,8 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
     
     private class DefaultListModelImpl extends DefaultListModel {
 
+        boolean is_adjusting;
+        
         void fireItemAdded( int index0, int index1 ) {
             fireIntervalAdded( XList.this, index0, index1);
         }
