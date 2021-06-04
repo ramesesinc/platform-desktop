@@ -530,6 +530,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
         }
 
         if (value == null) {
+            model.is_adjusting = false; 
             setSelectedIndex(0); 
             
         } else if ( isMultiselect() ) {
