@@ -561,6 +561,7 @@ public class XList extends JList implements UIControl, ActiveControl, MouseEvent
             }
             
         } else {
+            model.is_adjusting = false; 
             setSelectedValue(value, true);
         }
     }
