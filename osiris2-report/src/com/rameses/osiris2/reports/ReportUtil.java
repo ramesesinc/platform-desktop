@@ -25,6 +25,8 @@ import net.sf.jasperreports.view.JasperViewer;
 
 public final class ReportUtil {
         
+    public final static String REPORT_FILE_NAME = "REPORT_FILE_NAME"; 
+    
     public final static ReportURLStreamHandlerFactory factory = new ReportURLStreamHandlerFactory();
     
     private static boolean developerMode;
@@ -86,7 +88,10 @@ public final class ReportUtil {
         return print( jp, true ); 
     }
     public static boolean print( JasperPrint jp, boolean withPrintDialog ) throws Exception {
-        return JasperPrintManager.printReport(jp, withPrintDialog );
+//        return JasperPrintManager.printReport(jp, withPrintDialog );
+
+        JRPrinter printer = new JRPrinter( jp );
+        return printer.print( withPrintDialog ); 
     }
     
     public static boolean print( String reportName, Object reportData ) throws Exception {
@@ -140,7 +145,10 @@ public final class ReportUtil {
                     fos.flush();
                     f.setLastModified(newModified);
                 }
-                return (JasperReport) JRLoader.loadObject(f);
+                
+                JasperReport jr = (JasperReport) JRLoader.loadObject( f );
+                jr.setProperty(REPORT_FILE_NAME, f.getName().substring(0, f.getName().lastIndexOf(".jrxml"))); 
+                return jr; 
                 
             } catch( RuntimeException re ) { 
                 throw re; 
@@ -157,7 +165,19 @@ public final class ReportUtil {
                 if ( res == null ) { 
                     throw new Exception("Report name "+ name +" not recognized"); 
                 }  
-                return (JasperReport) JRLoader.loadObject( res ); 
+                
+                JasperReport jr = (JasperReport) JRLoader.loadObject( res );
+                
+                int idx = res.toString().lastIndexOf("/"); 
+                if ( idx > 0 ) {
+                    String sname = res.toString().substring(idx + 1);
+                    idx = sname.lastIndexOf(".jasper"); 
+                    if ( idx > 0 ) {
+                        sname = sname.substring(0, idx); 
+                    }
+                    jr.setProperty(REPORT_FILE_NAME, sname); 
+                }
+                return jr; 
                 
             } catch( RuntimeException re ) { 
                 throw re; 

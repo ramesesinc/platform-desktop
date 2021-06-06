@@ -454,5 +454,6 @@ public abstract class ReportModel {
         Map getStandardParameter();
     }
     
-    // </editor-fold>    
+    // </editor-fold>  
+    
 }
