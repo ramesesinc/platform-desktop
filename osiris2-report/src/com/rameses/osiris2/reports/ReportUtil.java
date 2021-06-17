@@ -88,10 +88,10 @@ public final class ReportUtil {
         return print( jp, true ); 
     }
     public static boolean print( JasperPrint jp, boolean withPrintDialog ) throws Exception {
-//        return JasperPrintManager.printReport(jp, withPrintDialog );
+        return JasperPrintManager.printReport(jp, withPrintDialog );
 
-        JRPrinter printer = new JRPrinter( jp );
-        return printer.print( withPrintDialog ); 
+//        JRPrinter printer = new JRPrinter( jp );
+//        return printer.print( withPrintDialog ); 
     }
     
     public static boolean print( String reportName, Object reportData ) throws Exception {

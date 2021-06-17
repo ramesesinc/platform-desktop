@@ -527,23 +527,16 @@ public class XReportPanel extends JPanel implements UIControl {
         }
         
         public final void actionPerformed(ActionEvent e) { 
-            if ( model == null ) {
-                return; 
-            }
-            
             try {
                 if ( !beforeExecute() ) { return; }
             } catch( BreakException be ) {
                 return; 
             }
             
-//            for ( ActionListener al : this.actions ) {
-//                System.out.println("al -> "+ al);
-//                al.actionPerformed( e ); 
-//            } 
-            
-            model.print(); 
-            
+            for ( ActionListener al : this.actions ) {
+                al.actionPerformed( e ); 
+            } 
+
             try { 
                 afterExecute();  
             } catch( BreakException be ) {
